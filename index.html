@@ -25,6 +25,9 @@ button:focus-visible{outline:2px solid var(--up);outline-offset:2px}
 button.main{background:#2f5fb3;border-color:#2f5fb3;font-weight:600}
 button.danger{color:var(--err)}
 .sp{flex:1}
+h1,#info,#done,#bPick,#bResume,#bNow,#bPause,#bTest,#bList,#bReset,.sp{display:none!important}
+button.ic{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0}
+button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #info{color:var(--mut);font-size:13px}
 #log{flex:1;min-height:200px;overflow:auto;background:#0e1013;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:12px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-all}
 #log div{color:#c5cad4}
@@ -33,6 +36,24 @@ button.danger{color:var(--err)}
 #log .down,#log .ok{color:var(--ok)}
 #log .warn{color:var(--warn)}
 #log .err{color:var(--err)}
+#keep{display:none;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;border:1px solid var(--warn);border-radius:8px;color:var(--warn);font-size:13px}
+#keep span{flex:1;min-width:200px}
+#panes{flex:1 1 0;min-height:200px;display:flex;gap:10px}
+#log{flex:1 1 0;min-width:0;min-height:0}
+#tree{flex:1 1 0;min-width:0;min-height:0;overflow:auto;background:#0e1013;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:13px/1.6 ui-monospace,Consolas,monospace}
+#tree .th{color:var(--mut);font-size:12px;padding-bottom:6px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+#tree .te{color:var(--mut)}
+#tree summary{cursor:pointer;color:var(--tx);padding:1px 0}
+#tree details>*:not(summary){margin-left:16px}
+#tree .tf{display:flex;align-items:center;gap:8px;color:#c5cad4}
+#tree .tf i{width:8px;height:8px;border-radius:50%;flex:none;background:var(--mut)}
+#tree .tf span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tree .tf em{font-style:normal;color:var(--mut);font-size:12px}
+#tree .ok i{background:var(--ok)}
+#tree .loc i{background:var(--up)}
+#tree .cld i{background:var(--warn)}
+#tree .diff i{background:var(--err)}
+@media(max-width:700px){#panes{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -44,7 +65,8 @@ button.danger{color:var(--err)}
 <div id="done">Done. The folder is up to date. Load unpacked in Chrome from this folder; keep this page open while you edit.</div>
 
 <div class="row">
-  <button class="main" id="bPick">Choose folder</button>
+  <button class="main ic" id="bSysn" title="Create EXTOS folder &amp; sync" aria-label="Create EXTOS folder and sync"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg></button>
+    <button id="bPick">Choose existing folder</button>
   <button id="bResume" style="display:none">Reconnect folder</button>
   <button id="bNow">Sync now</button>
   <button id="bPause">Pause</button>
@@ -56,10 +78,14 @@ button.danger{color:var(--err)}
 <div id="info">No folder connected.</div>
 
 <div class="row">
-  <button id="bCopy">Copy log</button>
-  <button id="bClear">Clear log</button>
+  <button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
+  <button class="ic" id="bClear" title="Clear log" aria-label="Clear log"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
 </div>
-<div id="log" aria-live="off"></div>
+<div id="keep"><span id="keepTxt"></span><button id="bKeepSite" title="Copy this site's address">Copy site</button><button id="bKeepLink" title="Copy the browser settings link">Copy settings link</button><button id="bKeepX" title="Dismiss" aria-label="Dismiss">✕</button></div>
+<div id="panes">
+  <div id="log" aria-live="off"></div>
+  <div id="tree"><div class="te">No folder connected</div></div>
+</div>
 
 <script>
 'use strict';
@@ -68,6 +94,7 @@ const VERSION   = '0.4';
 const DB_URL    = 'https://system-data-bf026-default-rtdb.asia-southeast1.firebasedatabase.app';
 const DB_PATH   = 'extSync/main';          // the ONLY branch this page touches
 const POLL_MS   = 3000;
+const SYSN_NAME = 'EXTOS';                  // folder created automatically inside the location you pick
 const MAX_BYTES = 5 * 1024 * 1024;         // larger files are skipped (with a warning)
 const SKIP_DIRS = new Set(['.git', 'node_modules']);
 const SKIP_FILE = /(^|\/)(\.DS_Store|Thumbs\.db|desktop\.ini)$|\.crswap$|~$/;
@@ -249,9 +276,19 @@ async function download(p) {
   hcache.delete(p);
   log('down', 'DOWNLOADED ' + p + ' (' + bytes.length + ' B, ' + short(hash) + ')');
 }
+async function purgeHistory(p) {
+  const key = keyOf(p);
+  try {
+    const r = await fetch(DB_URL + '/' + DB_PATH + '/history.json?shallow=true', { cache: 'no-store', signal: AbortSignal.timeout(20000) });
+    if (!r.ok) throw new Error('history list → HTTP ' + r.status);
+    const ks = Object.keys((await r.json()) || {}).filter(function (k) { return k.slice(k.indexOf('_') + 1) === key; });
+    for (const k of ks) await db('DELETE', 'history/' + k, undefined, true);
+    if (ks.length) log('info', 'purged ' + ks.length + ' old snapshot(s) of ' + p);
+  } catch (e) { log('warn', 'could not purge snapshots of ' + p + ': ' + e.message); }
+}
 async function deleteCloud(p) {
   const key = keyOf(p);
-  await archiveCloud(p, 'before delete');
+  await purgeHistory(p);
   await db('PUT', 'meta/' + key, { path: p, deleted: true, hash: null, mtime: Date.now(), by: DEVICE });
   await db('DELETE', 'blobs/' + key);
   delete base[p];
@@ -273,11 +310,6 @@ async function cycle(why) {
   try {
     if (!paused) setStatus('syncing', 'Syncing…');
     const loc = await localState();
-    const nBase = Object.keys(base).length;
-    if (loc.size === 0 && nBase >= 3) {
-      log('warn', 'folder is empty but ' + nBase + ' files were synced before: treating as a fresh restore (nothing will be deleted in the cloud)');
-      base = {};
-    }
     const rm = (await db('GET', 'meta', undefined, true)) || {};
     remote = {};
     for (const k in rm) if (rm[k] && rm[k].path) remote[rm[k].path] = rm[k];
@@ -287,7 +319,7 @@ async function cycle(why) {
     const paths = new Set([...loc.keys(), ...Object.keys(remote), ...Object.keys(base)]);
     for (const p of paths) {
       const L = loc.get(p), Rm = remote[p], R = Rm && !Rm.deleted ? Rm : null, B = base[p];
-      const lh = L && L.hash, rh = R && R.hash;
+      const lh = L ? L.hash : null, rh = R ? R.hash : null;
       if (lh === rh) { if (lh) base[p] = lh; else delete base[p]; continue; }
       if (L && !R) {
         if (B && lh === B && Rm && Rm.deleted) acts.push(['dl', p, 'deleted on another device']);
@@ -320,29 +352,127 @@ async function cycle(why) {
       log('info', 'cycle ' + cycles + ' (' + why + '): all in sync, local ' + loc.size + ', cloud ' + live);
     }
     saveBase();
-    $('info').textContent = 'Folder: ' + root.name + ' · local ' + loc.size + ' files · cloud ' + live + ' files · last check ' + new Date().toLocaleTimeString();
+    drawTree(loc, acts.length > 0);
+        $('info').textContent = 'Folder: ' + root.name + ' · local ' + loc.size + ' files · cloud ' + live + ' files · last check ' + new Date().toLocaleTimeString();
     if (errs) setStatus('error', 'Error (see log)');
     else {
       setStatus(paused ? 'paused' : 'synced', paused ? 'Paused' : 'Synced');
       if (!announced) { announced = true; $('done').style.display = 'block'; log('ok', 'DONE: folder is up to date with the cloud'); }
     }
   } catch (e) {
-    setStatus('error', e.message.indexOf('network') >= 0 ? 'Offline' : 'Error (see log)');
+    if (e.name === 'NotFoundError') {
+          if (timer) { clearInterval(timer); timer = null; }
+          root = null;
+          setStatus('paused', 'Folder missing: click EXTOS icon');
+          log('err', 'connected folder no longer exists (deleted or moved). Auto-sync stopped, cloud untouched. Click the EXTOS icon to reconnect.');
+          return;
+        }
+        setStatus('error', e.message.indexOf('network') >= 0 ? 'Offline' : 'Error (see log)');
     log('err', 'cycle failed: ' + e.message);
   } finally { busy = false; }
 }
 
 // ───────── Polling loop ─────────
+var treeClosed = {}, treeBusy = false, treeSig = '';
+var TREE_TIP = { ok: 'synced', loc: 'local only, uploading', cld: 'cloud only, downloading', diff: 'differs, resolving' };
+function fmtSize(n) {
+  if (n == null) return '';
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1048576).toFixed(1) + ' MB';
+}
+function treeNode(n, prefix, parent) {
+  Object.keys(n.d).sort().forEach(function (name) {
+    var path = prefix + name + '/';
+    var det = document.createElement('details');
+    var sm = document.createElement('summary');
+    det.open = !treeClosed[path];
+    det.ontoggle = function () { treeClosed[path] = !det.open; };
+    sm.textContent = name;
+    det.appendChild(sm);
+    treeNode(n.d[name], path, det);
+    parent.appendChild(det);
+  });
+  n.f.forEach(function (f) {
+    var row = document.createElement('div');
+    var dot = document.createElement('i');
+    var nm = document.createElement('span');
+    var sz = document.createElement('em');
+    row.className = 'tf ' + f.st;
+    row.title = f.name + ' · ' + TREE_TIP[f.st];
+    nm.textContent = f.name;
+    sz.textContent = fmtSize(f.size);
+    row.appendChild(dot);
+    row.appendChild(nm);
+    row.appendChild(sz);
+    parent.appendChild(row);
+  });
+}
+async function drawTree(loc, changed) {
+  if (treeBusy) return;
+  treeBusy = true;
+  try {
+    var files = {}, rem = remote, lc = loc, k, rm;
+    if (changed) {
+      rm = (await db('GET', 'meta', undefined, true)) || {};
+      rem = {};
+      for (k in rm) if (rm[k] && rm[k].path) rem[rm[k].path] = rm[k];
+      lc = await localState();
+    }
+    lc.forEach(function (v, key) { files[key] = { l: v, r: null }; });
+    Object.keys(rem).forEach(function (key) {
+      if (rem[key].deleted) return;
+      if (!files[key]) files[key] = { l: null, r: null };
+      files[key].r = rem[key];
+    });
+    var paths = Object.keys(files).sort(), sig = [], tree = { d: {}, f: [] }, cnt = { ok: 0, pend: 0 };
+    paths.forEach(function (path) {
+      var f = files[path];
+      var st = f.l && f.r ? (f.l.hash === f.r.hash ? 'ok' : 'diff') : (f.l ? 'loc' : 'cld');
+      var parts = path.split('/'), name = parts.pop(), n = tree;
+      var size = (f.l || f.r).size;
+      parts.forEach(function (s) { n = n.d[s] || (n.d[s] = { d: {}, f: [] }); });
+      n.f.push({ name: name, st: st, size: size });
+      sig.push(path + '|' + st + '|' + size);
+      if (st === 'ok') cnt.ok++; else cnt.pend++;
+    });
+    var sg = (root ? root.name : '') + '#' + sig.join('\n');
+    if (sg === treeSig) return;
+    treeSig = sg;
+    var el = $('tree'), keep = el.scrollTop;
+    var head = document.createElement('div');
+    el.textContent = '';
+    head.className = 'th';
+    head.textContent = (root ? root.name : 'Folder') + ' · ' + paths.length + ' files · ' + cnt.ok + ' synced' + (cnt.pend ? ' · ' + cnt.pend + ' pending' : '');
+    el.appendChild(head);
+    if (!paths.length) {
+      var emp = document.createElement('div');
+      emp.className = 'te';
+      emp.textContent = 'No files yet';
+      el.appendChild(emp);
+    } else treeNode(tree, '', el);
+    el.scrollTop = keep;
+  } catch (e) { log('warn', 'file tree refresh failed: ' + e.message); }
+  finally { treeBusy = false; }
+}
 let timer = null, lastTick = 0;
+var tickWorker = null;
 function startLoop() {
   if (timer) clearInterval(timer);
+  if (tickWorker) { tickWorker.terminate(); tickWorker = null; }
   lastTick = Date.now();
-  timer = setInterval(() => {
-    const now = Date.now(), gap = now - lastTick;
+  var tick = function () {
+    var now = Date.now(), gap = now - lastTick;
+    if (gap < POLL_MS - 500) return;
     lastTick = now;
     if (gap > POLL_MS * 3) log('warn', 'poll was delayed ' + Math.round(gap / 1000) + ' s (browser throttles hidden tabs; keep this page visible or in its own window)');
     if (!paused) cycle('auto');
-  }, POLL_MS);
+  };
+  timer = setInterval(tick, POLL_MS);
+  try {
+    tickWorker = new Worker(URL.createObjectURL(new Blob(['setInterval(function(){postMessage(1)},' + POLL_MS + ')'], { type: 'text/javascript' })));
+    tickWorker.onmessage = tick;
+  } catch (e) { tickWorker = null; }
 }
 
 // ───────── Folder connect ─────────
@@ -363,6 +493,24 @@ async function pickFolder() {
   catch (e) { log('warn', 'folder picker closed: ' + e.name); return; }
   await idbSet('handle', h);
   await useFolder(h, true);
+}
+async function setupSysn() {
+  if (!window.showDirectoryPicker) { log('err', 'showDirectoryPicker is not available: use desktop Chrome or Edge over https'); return; }
+  log('info', 'EXTOS setup: pick where the EXTOS folder should be created (browser will ask for permission)');
+  var parent, h, existed = true;
+  try { parent = await window.showDirectoryPicker({ mode: 'readwrite', id: 'extsyncparent', startIn: 'documents' }); }
+  catch (e) { log('warn', 'SYSN setup cancelled: ' + e.name); return; }
+  try {
+    if (parent.name === SYSN_NAME) { h = parent; }
+    else {
+      try { await parent.getDirectoryHandle(SYSN_NAME); } catch (e) { existed = false; }
+      h = await parent.getDirectoryHandle(SYSN_NAME, { create: true });
+    }
+  } catch (e) { log('err', 'could not create ' + SYSN_NAME + ': ' + e.message); return; }
+  log('ok', 'permission granted · folder ' + SYSN_NAME + (existed ? ' ready (already existed)' : ' CREATED') + ' inside "' + parent.name + '"');
+  await idbSet('handle', h);
+  await useFolder(h, true);
+  log('ok', 'EXTOS connected: cloud files downloaded, auto-sync running (add/edit/delete syncs both ways)');
 }
 async function resumeFolder() {
   const h = await idbGet('handle');
@@ -400,6 +548,29 @@ async function resetCloud() {
 
 // ───────── Wiring ─────────
 $('bPick').onclick = pickFolder;
+$('bSysn').onclick = setupSysn;
+var IS_EDGE = /Edg\//.test(navigator.userAgent);
+var KEEP_URL = IS_EDGE ? 'edge://settings/system/optimizePerformance' : 'chrome://settings/performance';
+function copyText(t, okMsg) {
+  var done = function () { log('ok', okMsg); };
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, function () { log('warn', 'copy failed'); });
+  else {
+    var ta = document.createElement('textarea');
+    ta.value = t; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove(); done();
+  }
+}
+function keepPrompt() {
+  try { if (localStorage.getItem('extsync.keepdone')) return; } catch (e) {}
+  $('keepTxt').textContent = 'Keep sync running in the background: open ' + KEEP_URL + ' → ' + (IS_EDGE ? '"Never put these sites to sleep"' : '"Always keep these sites active"') + ' → Add → paste this site.';
+  $('keep').style.display = 'flex';
+}
+$('bKeepSite').onclick = function () { copyText(location.hostname || location.href, 'site address copied: paste it in the browser settings list'); };
+$('bKeepLink').onclick = function () { copyText(KEEP_URL, 'settings link copied: paste it in a new tab address bar'); };
+$('bKeepX').onclick = function () {
+  $('keep').style.display = 'none';
+  try { localStorage.setItem('extsync.keepdone', '1'); } catch (e) {}
+};
 $('bResume').onclick = resumeFolder;
 $('bNow').onclick = () => root ? cycle('manual') : log('warn', 'choose a folder first');
 $('bPause').onclick = () => {
@@ -433,6 +604,8 @@ window.addEventListener('unhandledrejection', e => log('err', 'unhandled: ' + (e
 // ───────── Startup ─────────
 (async function init() {
   log('info', 'Folder Sync v' + VERSION + ' · device ' + DEVICE);
+    try { if (navigator.locks) navigator.locks.request('extsync-keepalive', function () { return new Promise(function () {}); }); } catch (e) {}
+    keepPrompt();
   log('info', 'browser: ' + navigator.userAgent);
   log('info', 'secure context: ' + window.isSecureContext + ' · folder API: ' + !!window.showDirectoryPicker + ' · crypto: ' + !!(window.crypto && crypto.subtle));
   log('info', 'cloud: ' + DB_URL + '/' + DB_PATH);
@@ -447,7 +620,7 @@ window.addEventListener('unhandledrejection', e => log('err', 'unhandled: ' + (e
       const p = await h.queryPermission({ mode: 'readwrite' });
       log('info', 'saved folder "' + h.name + '", permission: ' + p);
       if (p === 'granted') await useFolder(h, false);
-      else { $('bResume').style.display = ''; $('bResume').textContent = 'Reconnect "' + h.name + '"'; setStatus('paused', 'Click Reconnect'); }
+      else { $('bResume').style.display = ''; $('bResume').textContent = 'Reconnect "' + h.name + '"'; setStatus('paused', 'Click EXTOS icon to reconnect'); }
     }
   } catch (e) { log('warn', 'could not restore saved folder: ' + e.message); }
 })();
