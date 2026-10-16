@@ -50,10 +50,20 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 #tree .tf span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #tree .tf em{font-style:normal;color:var(--mut);font-size:12px}
 #tree .ok i{background:var(--ok)}
+#tree .tf span{cursor:pointer}
+#tree .tf span:hover{text-decoration:underline}
+#tree .tf button.del{flex:none;width:22px;height:22px;padding:0;line-height:1;font-size:12px;background:transparent;border-color:transparent;color:var(--mut)}
+#tree .tf button.del:hover{color:var(--err);border-color:var(--err)}
 #tree .loc i{background:var(--up)}
 #tree .cld i{background:var(--warn)}
 #tree .diff i{background:var(--err)}
 @media(max-width:700px){#panes{flex-direction:column}}
+.row:not(:has(#bCopy)){display:none}
+#panes{order:50}
+#bOpen{display:none!important}
+.row:has(#bCopy){order:100;justify-content:space-around;gap:0;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.row:has(#bCopy) button.ic{width:46px;height:46px}
+.row:has(#bCopy) button.ic svg{width:22px;height:22px}
 </style>
 </head>
 <body>
@@ -65,7 +75,7 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 <div id="done">Done. The folder is up to date. Load unpacked in Chrome from this folder; keep this page open while you edit.</div>
 
 <div class="row">
-  <button class="main ic" id="bSysn" title="Create EXTOS folder &amp; sync" aria-label="Create EXTOS folder and sync"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg></button>
+  
     <button id="bPick">Choose existing folder</button>
   <button id="bResume" style="display:none">Reconnect folder</button>
   <button id="bNow">Sync now</button>
@@ -78,7 +88,10 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 <div id="info">No folder connected.</div>
 
 <div class="row">
-  <button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
+  <button class="main ic" id="bSysn" title="Create EXTOS folder &amp; sync" aria-label="Create EXTOS folder and sync"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg></button>
+    <button class="ic" id="bOpen" title="Open folder" aria-label="Open folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 8z"/><path d="M7 10h15l-3 8H3z"/></svg></button>
+      <button class="ic" id="bZip" title="Download EXTOS.zip" aria-label="Download EXTOS.zip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
+        <button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
   <button class="ic" id="bClear" title="Clear log" aria-label="Clear log"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
 </div>
 <div id="keep"><span id="keepTxt"></span><button id="bKeepSite" title="Copy this site's address">Copy site</button><button id="bKeepLink" title="Copy the browser settings link">Copy settings link</button><button id="bKeepX" title="Dismiss" aria-label="Dismiss">✕</button></div>
@@ -177,11 +190,26 @@ async function idbSet(k, v) {
 
 // ───────── Firebase REST ─────────
 async function db(method, sub, body, quiet) {
+  var tries = (method === 'GET' || method === 'PUT' || method === 'DELETE') ? 3 : 1;
+  var lastErr = null;
+  for (var i = 1; i <= tries; i++) {
+    try { return await dbOnce(method, sub, body, quiet); }
+    catch (e) {
+      lastErr = e;
+      if (!/network error/i.test(e.message) || i === tries) break;
+      log('warn', method + ' ' + (sub || '/') + ' attempt ' + i + ' failed (' + e.message + '), retrying');
+      await new Promise(function (res) { setTimeout(res, 1000 * i); });
+    }
+  }
+  throw lastErr;
+}
+async function dbOnce(method, sub, body, quiet) {
   const url = DB_URL + '/' + DB_PATH + (sub ? '/' + sub : '') + '.json';
   const t0 = performance.now();
-  let r;
+  var r, data = null;
   try {
-    r = await fetch(url, { method, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(20000) });
+    r = await fetch(url, { method, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(60000) });
+        if (method === 'GET' && r.ok) data = await r.json();
   } catch (e) {
     throw new Error(method + ' ' + sub + ' network error: ' + e.name + ' after ' + Math.round(performance.now() - t0) + ' ms');
   }
@@ -189,7 +217,7 @@ async function db(method, sub, body, quiet) {
   if (!quiet) log('net', method + ' ' + (sub || '/') + ' → ' + r.status + ' (' + ms + ' ms)');
   else if (ms > 3000) log('warn', 'slow request: ' + method + ' ' + (sub || '/') + ' took ' + ms + ' ms');
   if (!r.ok) throw new Error(method + ' ' + sub + ' → HTTP ' + r.status + (r.status === 401 || r.status === 403 ? ' (denied: check Firebase rules)' : ''));
-  return method === 'GET' ? r.json() : null;
+  return method === 'GET' ? data : null;
 }
 
 // ───────── Local folder access ─────────
@@ -297,12 +325,12 @@ async function deleteCloud(p) {
 
 // ───────── Sync cycle ─────────
 let busy = false, paused = false, cycles = 0, announced = false;
-let busySince = 0;
+var busySince = 0, lastSkipLog = 0;
 async function cycle(why) {
   if (!root) return;
   if (busy) {
     const s = Date.now() - busySince;
-    if (s > 5000) log('warn', 'cycle "' + why + '" skipped: previous cycle still running (' + Math.round(s / 1000) + ' s)');
+    if (s > 15000 && Date.now() - lastSkipLog > 30000) { lastSkipLog = Date.now(); log('warn', 'cycle "' + why + '" skipped: previous cycle still running (' + Math.round(s / 1000) + ' s)'); }
     return;
   }
   busy = true; busySince = Date.now();
@@ -402,10 +430,17 @@ function treeNode(n, prefix, parent) {
     row.title = f.name + ' · ' + TREE_TIP[f.st];
     nm.textContent = f.name;
     sz.textContent = fmtSize(f.size);
-    row.appendChild(dot);
-    row.appendChild(nm);
-    row.appendChild(sz);
-    parent.appendChild(row);
+    var del = document.createElement('button');
+        del.className = 'del';
+        del.textContent = '✕';
+        del.title = 'Delete ' + f.name;
+        del.onclick = function (ev) { ev.stopPropagation(); deleteFile(prefix + f.name); };
+        nm.onclick = function () { openFile(prefix + f.name); };
+        row.appendChild(dot);
+        row.appendChild(nm);
+        row.appendChild(sz);
+        row.appendChild(del);
+        parent.appendChild(row);
   });
 }
 async function drawTree(loc, changed) {
@@ -547,6 +582,85 @@ async function resetCloud() {
 }
 
 // ───────── Wiring ─────────
+var MIME = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', pdf: 'application/pdf' };
+async function openFile(p) {
+  try {
+    var l = await readLocal(p);
+    var ext = p.split('.').pop().toLowerCase();
+    var url = URL.createObjectURL(new Blob([l.buf], { type: MIME[ext] || 'text/plain;charset=utf-8' }));
+    window.open(url, '_blank');
+    setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+  } catch (e) { log('warn', 'cannot open ' + p + ': ' + e.message + ' (it may still be downloading)'); }
+}
+async function deleteFile(p) {
+  if (!root) return;
+  if (!confirm('Delete "' + p + '" from the folder and the cloud?')) return;
+  try {
+    try { await deleteLocal(p); } catch (e) { if (e.name !== 'NotFoundError') throw e; }
+    await deleteCloud(p);
+    hcache.delete(p);
+    delete base[p];
+    saveBase();
+    log('ok', 'deleted ' + p);
+    cycle('manual');
+  } catch (e) { log('err', 'delete ' + p + ' failed: ' + e.message); }
+}
+async function openFolder() {
+  if (!root) { log('warn', 'connect the EXTOS folder first'); return; }
+  try { await window.showDirectoryPicker({ mode: 'read', startIn: root }); }
+  catch (e) { /* dialog closed */ }
+}
+var CRC_T = (function () {
+  var t = [], c, n, k;
+  for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
+  return t;
+})();
+function crc32(b) {
+  var c = 0xFFFFFFFF;
+  for (var i = 0; i < b.length; i++) c = CRC_T[(c ^ b[i]) & 255] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+async function downloadZip() {
+  if (!root) { log('warn', 'connect the EXTOS folder first'); return; }
+  try {
+    var handles = new Map();
+    await scan(root, '', handles);
+    var ents = Array.from(handles.entries());
+    var enc = new TextEncoder(), parts = [], central = [], offset = 0, i, csize = 0;
+    for (i = 0; i < ents.length; i++) {
+      var p = ents[i][0], f = await ents[i][1].getFile();
+      var data = new Uint8Array(await f.arrayBuffer()), name = enc.encode(p), crc = crc32(data);
+      var d = new Date(f.lastModified);
+      var dt = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+      var tm = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF;
+      var lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+      lh.setUint16(8, 0, true); lh.setUint16(10, tm, true); lh.setUint16(12, dt, true);
+      lh.setUint32(14, crc, true); lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true);
+      lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+      var ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true);
+      ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true); ch.setUint16(12, tm, true); ch.setUint16(14, dt, true);
+      ch.setUint32(16, crc, true); ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true);
+      ch.setUint16(28, name.length, true); ch.setUint32(42, offset, true);
+      parts.push(lh.buffer, name, data);
+      central.push(ch.buffer, name);
+      csize += 46 + name.length;
+      offset += 30 + name.length + data.length;
+    }
+    var end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, ents.length, true); end.setUint16(10, ents.length, true);
+    end.setUint32(12, csize, true); end.setUint32(16, offset, true);
+    var blob = new Blob(parts.concat(central, [end.buffer]), { type: 'application/zip' });
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'EXTOS.zip';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+    log('ok', 'EXTOS.zip downloaded (' + ents.length + ' files, ' + blob.size + ' B)');
+  } catch (e) { log('err', 'zip failed: ' + e.message); }
+}
+$('bOpen').onclick = openFolder;
+$('bZip').onclick = downloadZip;
 $('bPick').onclick = pickFolder;
 $('bSysn').onclick = setupSysn;
 var IS_EDGE = /Edg\//.test(navigator.userAgent);
