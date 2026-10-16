@@ -64,7 +64,7 @@ button.danger{color:var(--err)}
 <script>
 'use strict';
 // ───────── Settings ─────────
-const VERSION   = '0.3';
+const VERSION   = '0.4';
 const DB_URL    = 'https://system-data-bf026-default-rtdb.asia-southeast1.firebasedatabase.app';
 const DB_PATH   = 'extSync/main';          // the ONLY branch this page touches
 const POLL_MS   = 3000;
@@ -273,8 +273,9 @@ async function cycle(why) {
   try {
     if (!paused) setStatus('syncing', 'Syncing…');
     const loc = await localState();
-    if (loc.size === 0 && Object.keys(base).length) {
-      log('warn', 'folder is empty but a previous sync existed: treating as a fresh restore (nothing will be deleted in the cloud)');
+    const nBase = Object.keys(base).length;
+    if (loc.size === 0 && nBase >= 3) {
+      log('warn', 'folder is empty but ' + nBase + ' files were synced before: treating as a fresh restore (nothing will be deleted in the cloud)');
       base = {};
     }
     const rm = (await db('GET', 'meta', undefined, true)) || {};
