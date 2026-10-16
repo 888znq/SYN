@@ -190,7 +190,7 @@ async function idbSet(k, v) {
 
 // ───────── Firebase REST ─────────
 async function db(method, sub, body, quiet) {
-  var tries = (method === 'GET' || method === 'PUT' || method === 'DELETE') ? 3 : 1;
+  var tries = (method === 'GET' || method === 'PUT' || method === 'DELETE') ? 5 : 1;
   var lastErr = null;
   for (var i = 1; i <= tries; i++) {
     try { return await dbOnce(method, sub, body, quiet); }
@@ -208,7 +208,7 @@ async function dbOnce(method, sub, body, quiet) {
   const t0 = performance.now();
   var r, data = null;
   try {
-    r = await fetch(url, { method, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(60000) });
+    r = await fetch(url, { method, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(/^(blobs|history)\//.test(sub || '') ? 45000 : 15000) });
         if (method === 'GET' && r.ok) data = await r.json();
   } catch (e) {
     throw new Error(method + ' ' + sub + ' network error: ' + e.name + ' after ' + Math.round(performance.now() - t0) + ' ms');
@@ -623,7 +623,12 @@ function crc32(b) {
 async function downloadZip() {
   if (!root) { log('warn', 'connect the EXTOS folder first'); return; }
   try {
-    var handles = new Map();
+    var fh = null;
+        if (window.showSaveFilePicker) {
+          try { fh = await window.showSaveFilePicker({ suggestedName: 'EXTOS.zip', types: [{ description: 'ZIP archive', accept: { 'application/zip': ['.zip'] } }] }); }
+          catch (e) { if (e.name === 'AbortError') { log('warn', 'zip save cancelled'); return; } log('warn', 'save dialog unavailable: ' + e.name); }
+        }
+        var handles = new Map();
     await scan(root, '', handles);
     var ents = Array.from(handles.entries());
     var enc = new TextEncoder(), parts = [], central = [], offset = 0, i, csize = 0;
@@ -652,7 +657,14 @@ async function downloadZip() {
     end.setUint32(0, 0x06054b50, true); end.setUint16(8, ents.length, true); end.setUint16(10, ents.length, true);
     end.setUint32(12, csize, true); end.setUint32(16, offset, true);
     var blob = new Blob(parts.concat(central, [end.buffer]), { type: 'application/zip' });
-    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    if (fh) {
+          var w = await fh.createWritable();
+          await w.write(blob);
+          await w.close();
+          log('ok', 'EXTOS.zip saved (' + ents.length + ' files, ' + blob.size + ' B)');
+          return;
+        }
+        var url = URL.createObjectURL(blob), a = document.createElement('a');
     a.href = url; a.download = 'EXTOS.zip';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
