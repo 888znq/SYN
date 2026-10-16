@@ -64,7 +64,7 @@ button.danger{color:var(--err)}
 <script>
 'use strict';
 // ───────── Settings ─────────
-const VERSION   = '0.1';
+const VERSION   = '0.2';
 const DB_URL    = 'https://system-data-bf026-default-rtdb.asia-southeast1.firebasedatabase.app';
 const DB_PATH   = 'extSync/main';          // the ONLY branch this page touches
 const POLL_MS   = 3000;
@@ -108,7 +108,12 @@ function setStatus(s, txt) {
   $('pillTxt').textContent = txt;
 }
 
-const keyOf = p => encodeURIComponent(p).replace(/\./g, '%2E');
+// Firebase decodes %2E / %2F inside the URL path, so keys may only contain safe characters.
+// Everything except letters, digits, _ and - becomes ~XX (hex of each UTF-8 byte). The real path lives in meta.path.
+const keyOf = p => Array.from(new TextEncoder().encode(p)).map(function (c) {
+  const ch = String.fromCharCode(c);
+  return /[A-Za-z0-9_-]/.test(ch) ? ch : '~' + c.toString(16).padStart(2, '0');
+}).join('');
 function b64enc(buf) {
   const b = new Uint8Array(buf); let s = '';
   for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
