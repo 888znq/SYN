@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Folder Sync</title>
 <style>
-:root{--bg:#14161a;--panel:#1c1f25;--line:#2c313b;--tx:#e8eaee;--mut:#8f97a6;--ok:#4fd1a1;--warn:#f2b84b;--err:#ff7b7b;--up:#7db4ff;--btn:#272c35}
+:root{--bg:#000432;--panel:#000432;--line:#2c313b;--tx:#e8eaee;--mut:#8f97a6;--ok:#4fd1a1;--warn:#f2b84b;--err:#ff7b7b;--up:#7db4ff;--btn:#000432}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;gap:10px;padding:12px}
@@ -22,14 +22,14 @@ h1{font-size:18px;margin:0;font-weight:650;letter-spacing:.2px}
 button{font:inherit;color:var(--tx);background:var(--btn);border:1px solid var(--line);border-radius:7px;padding:7px 12px;cursor:pointer}
 button:hover{border-color:var(--mut)}
 button:focus-visible{outline:2px solid var(--up);outline-offset:2px}
-button.main{background:#2f5fb3;border-color:#2f5fb3;font-weight:600}
+button.main{background:#000432;border-color:#2f5fb3;font-weight:600}
 button.danger{color:var(--err)}
 .sp{flex:1}
 h1,#info,#done,#bPick,#bResume,#bNow,#bPause,#bTest,#bList,#bReset,.sp{display:none!important}
 button.ic{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0}
 button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #info{color:var(--mut);font-size:13px}
-#log{flex:1;min-height:200px;overflow:auto;background:#0e1013;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:12px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-all}
+#log{flex:1;min-height:200px;overflow:auto;background:#000432;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:12px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-all}
 #log div{color:#c5cad4}
 #log .net{color:var(--mut)}
 #log .up{color:var(--up)}
@@ -40,7 +40,7 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 #keep span{flex:1;min-width:200px}
 #panes{flex:1 1 0;min-height:200px;display:flex;gap:10px}
 #log{flex:1 1 0;min-width:0;min-height:0}
-#tree{flex:1 1 0;min-width:0;min-height:0;overflow:auto;background:#0e1013;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:13px/1.6 ui-monospace,Consolas,monospace}
+#tree{flex:1 1 0;min-width:0;min-height:0;overflow:auto;background:#000432;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:13px/1.6 ui-monospace,Consolas,monospace}
 #tree .th{color:var(--mut);font-size:12px;padding-bottom:6px;margin-bottom:4px;border-bottom:1px solid var(--line)}
 #tree .te{color:var(--mut)}
 #tree summary{cursor:pointer;color:var(--tx);padding:1px 0}
@@ -91,7 +91,9 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
   <button class="main ic" id="bSysn" title="Create EXTOS folder &amp; sync" aria-label="Create EXTOS folder and sync"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg></button>
     <button class="ic" id="bOpen" title="Open folder" aria-label="Open folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 8z"/><path d="M7 10h15l-3 8H3z"/></svg></button>
       <button class="ic" id="bZip" title="Download EXTOS.zip" aria-label="Download EXTOS.zip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
-        <button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
+        <button class="ic danger" id="bRestore" title="Wipe folder and restore master" aria-label="Wipe folder and restore master"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+          <button class="ic" id="bMaster" title="Save current folder as master" aria-label="Save current folder as master"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
+          <button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
   <button class="ic" id="bClear" title="Clear log" aria-label="Clear log"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
 </div>
 <div id="keep"><span id="keepTxt"></span><button id="bKeepSite" title="Copy this site's address">Copy site</button><button id="bKeepLink" title="Copy the browser settings link">Copy settings link</button><button id="bKeepX" title="Dismiss" aria-label="Dismiss">✕</button></div>
@@ -208,7 +210,7 @@ async function dbOnce(method, sub, body, quiet) {
   const t0 = performance.now();
   var r, data = null;
   try {
-    r = await fetch(url, { method, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(/^(blobs|history)\//.test(sub || '') ? 45000 : 15000) });
+    r = await fetch(url, { method, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(/^(blobs|history|master)\//.test(sub || '') ? 45000 : 15000) });
         if (method === 'GET' && r.ok) data = await r.json();
   } catch (e) {
     throw new Error(method + ' ' + sub + ' network error: ' + e.name + ' after ' + Math.round(performance.now() - t0) + ' ms');
@@ -610,6 +612,96 @@ async function openFolder() {
   try { await window.showDirectoryPicker({ mode: 'read', startIn: root }); }
   catch (e) { /* dialog closed */ }
 }
+async function lockSync() {
+  while (busy) await new Promise(function (r) { setTimeout(r, 200); });
+  busy = true; busySince = Date.now();
+}
+async function pruneEmpty(dir) {
+  var empty = true, subs = [], i, sub, e;
+  for await (e of dir.entries()) {
+    if (e[1].kind === 'directory' && !SKIP_DIRS.has(e[0])) subs.push(e[0]);
+    else empty = false;
+  }
+  for (i = 0; i < subs.length; i++) {
+    sub = await dir.getDirectoryHandle(subs[i]);
+    if (await pruneEmpty(sub)) await dir.removeEntry(subs[i]);
+    else empty = false;
+  }
+  return empty;
+}
+async function saveMaster() {
+  if (!root) { log('warn', 'connect the EXTOS folder first'); return; }
+  if (!confirm('Save the current folder as the new master version?\nThis replaces the previously saved master.')) return;
+  await lockSync();
+  try {
+    setStatus('syncing', 'Saving master…');
+    var loc = await localState();
+    var paths = Array.from(loc.keys());
+    if (!paths.length) { log('warn', 'folder is empty: master not changed'); return; }
+    var oldMeta = (await db('GET', 'master/meta', undefined, true)) || {};
+    var meta = {}, i, p, l, key;
+    for (i = 0; i < paths.length; i++) {
+      p = paths[i]; l = await readLocal(p); key = keyOf(p);
+      await db('PUT', 'master/blobs/' + key, b64enc(l.buf), true);
+      meta[key] = { path: p, hash: l.hash, size: l.buf.byteLength };
+      if ((i + 1) % 10 === 0) log('info', 'master: ' + (i + 1) + '/' + paths.length + ' files saved');
+    }
+    await db('PUT', 'master/meta', meta, true);
+    await db('PUT', 'master/info', { savedAt: Date.now(), count: paths.length, by: DEVICE }, true);
+    for (key in oldMeta) { if (!meta[key]) await db('DELETE', 'master/blobs/' + key, undefined, true); }
+    log('ok', 'MASTER saved: ' + paths.length + ' files');
+  } catch (e) { log('err', 'save master failed: ' + e.message); }
+  finally { busy = false; }
+}
+async function restoreMaster() {
+  if (!root) { log('warn', 'connect the EXTOS folder first'); return; }
+  var info = null;
+  try { info = await db('GET', 'master/info', undefined, true); }
+  catch (e) { log('err', 'cannot reach cloud: ' + e.message); return; }
+  if (!info) { log('warn', 'no master saved yet: use the save-master button first'); return; }
+  if (!confirm('WIPE the current folder and restore the master saved ' + new Date(info.savedAt).toLocaleString() + ' (' + info.count + ' files)?\n\nFiles that are not in the master will be deleted here and in the cloud.')) return;
+  var wiping = false;
+  await lockSync();
+  try {
+    setStatus('syncing', 'Restoring master…');
+    var meta = (await db('GET', 'master/meta', undefined, true)) || {};
+    var keys = Object.keys(meta), files = [], i, m, b, bytes, h, f;
+    if (!keys.length) throw new Error('master is empty');
+    for (i = 0; i < keys.length; i++) {
+      m = meta[keys[i]];
+      b = await db('GET', 'master/blobs/' + keys[i], undefined, true);
+      if (b == null) throw new Error('master content missing for ' + m.path);
+      bytes = b64dec(b); h = await sha(bytes);
+      if (h !== m.hash) throw new Error('master file damaged: ' + m.path);
+      files.push({ p: m.path, bytes: bytes });
+    }
+    log('info', 'master verified: ' + files.length + ' files, wiping folder');
+    wiping = true;
+    paused = true;
+    var handles = new Map();
+    await scan(root, '', handles);
+    var it = Array.from(handles.entries());
+    for (i = 0; i < it.length; i++) {
+      f = await it[i][1].getFile();
+      if (f.size > MAX_BYTES) { log('warn', 'kept ' + it[i][0] + ' (too large to sync)'); continue; }
+      await deleteLocal(it[i][0]);
+      hcache.delete(it[i][0]);
+    }
+    await pruneEmpty(root);
+    for (i = 0; i < files.length; i++) { await writeLocal(files[i].p, files[i].bytes); hcache.delete(files[i].p); }
+    log('ok', 'MASTER restored: ' + files.length + ' files written');
+  } catch (e) {
+    log('err', 'restore master failed: ' + e.message);
+    if (wiping) {
+      setStatus('paused', 'Restore failed');
+      log('err', 'restore stopped midway: auto-sync paused so the cloud stays untouched. Click restore again to retry.');
+      return;
+    }
+  }
+  finally { busy = false; }
+  paused = false;
+  cycle('restore');
+}
 var CRC_T = (function () {
   var t = [], c, n, k;
   for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
@@ -673,6 +765,8 @@ async function downloadZip() {
 }
 $('bOpen').onclick = openFolder;
 $('bZip').onclick = downloadZip;
+$('bMaster').onclick = saveMaster;
+$('bRestore').onclick = restoreMaster;
 $('bPick').onclick = pickFolder;
 $('bSysn').onclick = setupSysn;
 var IS_EDGE = /Edg\//.test(navigator.userAgent);
@@ -722,7 +816,7 @@ $('bCopy').onclick = async () => {
 };
 document.addEventListener('visibilitychange', () => {
   log('net', 'tab ' + document.visibilityState);
-  if (document.visibilityState === 'visible') cycle('tab visible');
+  if (document.visibilityState === 'visible' && !paused) cycle('tab visible');
 });
 window.addEventListener('error', e => log('err', 'uncaught: ' + e.message));
 window.addEventListener('unhandledrejection', e => log('err', 'unhandled: ' + (e.reason && e.reason.message || e.reason)));
