@@ -64,7 +64,7 @@ button.danger{color:var(--err)}
 <script>
 'use strict';
 // ───────── Settings ─────────
-const VERSION   = '0.2';
+const VERSION   = '0.3';
 const DB_URL    = 'https://system-data-bf026-default-rtdb.asia-southeast1.firebasedatabase.app';
 const DB_PATH   = 'extSync/main';          // the ONLY branch this page touches
 const POLL_MS   = 3000;
@@ -154,12 +154,13 @@ async function db(method, sub, body, quiet) {
   const t0 = performance.now();
   let r;
   try {
-    r = await fetch(url, { method, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store' });
+    r = await fetch(url, { method, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(20000) });
   } catch (e) {
-    throw new Error(method + ' ' + sub + ' network error: ' + e.message);
+    throw new Error(method + ' ' + sub + ' network error: ' + e.name + ' after ' + Math.round(performance.now() - t0) + ' ms');
   }
   const ms = Math.round(performance.now() - t0);
   if (!quiet) log('net', method + ' ' + (sub || '/') + ' → ' + r.status + ' (' + ms + ' ms)');
+  else if (ms > 3000) log('warn', 'slow request: ' + method + ' ' + (sub || '/') + ' took ' + ms + ' ms');
   if (!r.ok) throw new Error(method + ' ' + sub + ' → HTTP ' + r.status + (r.status === 401 || r.status === 403 ? ' (denied: check Firebase rules)' : ''));
   return method === 'GET' ? r.json() : null;
 }
@@ -259,9 +260,15 @@ async function deleteCloud(p) {
 
 // ───────── Sync cycle ─────────
 let busy = false, paused = false, cycles = 0, announced = false;
+let busySince = 0;
 async function cycle(why) {
-  if (busy || !root) return;
-  busy = true;
+  if (!root) return;
+  if (busy) {
+    const s = Date.now() - busySince;
+    if (s > 5000) log('warn', 'cycle "' + why + '" skipped: previous cycle still running (' + Math.round(s / 1000) + ' s)');
+    return;
+  }
+  busy = true; busySince = Date.now();
   let errs = 0;
   try {
     if (!paused) setStatus('syncing', 'Syncing…');
