@@ -6,6 +6,7 @@
 <title>Folder Sync</title>
 <style>
 :root{--bg:#000432;--panel:#000432;--line:#2c313b;--tx:#e8eaee;--mut:#8f97a6;--ok:#4fd1a1;--warn:#f2b84b;--err:#ff7b7b;--up:#7db4ff;--btn:#000432}
+:root[data-p=fftbot]{--bg:#02281e;--panel:#02281e;--btn:#02281e}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;gap:10px;padding:12px}
@@ -17,19 +18,22 @@ h1{font-size:18px;margin:0;font-weight:650;letter-spacing:.2px}
 .pill[data-s=syncing] i{background:var(--up)}
 .pill[data-s=error] i{background:var(--err)}
 .pill[data-s=paused] i{background:var(--warn)}
+.proj{display:flex;gap:6px}
+.proj button{border-radius:999px;padding:5px 14px;color:var(--mut)}
+.proj button.on{color:var(--tx);border-color:var(--up);font-weight:650}
 #done{display:none;padding:10px 14px;border:1px solid var(--ok);border-radius:8px;color:var(--ok);font-weight:600}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 button{font:inherit;color:var(--tx);background:var(--btn);border:1px solid var(--line);border-radius:7px;padding:7px 12px;cursor:pointer}
 button:hover{border-color:var(--mut)}
 button:focus-visible{outline:2px solid var(--up);outline-offset:2px}
-button.main{background:#000432;border-color:#2f5fb3;font-weight:600}
+button.main{background:var(--bg);border-color:#2f5fb3;font-weight:600}
 button.danger{color:var(--err)}
 .sp{flex:1}
 h1,#info,#done,#bPick,#bResume,#bNow,#bPause,#bTest,#bList,#bReset,.sp{display:none!important}
 button.ic{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0}
 button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #info{color:var(--mut);font-size:13px}
-#log{flex:1;min-height:200px;overflow:auto;background:#000432;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:12px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-all}
+#log{flex:1;min-height:200px;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:12px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-all}
 #log div{color:#c5cad4}
 #log .net{color:var(--mut)}
 #log .up{color:var(--up)}
@@ -40,7 +44,7 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 #keep span{flex:1;min-width:200px}
 #panes{flex:1 1 0;min-height:200px;display:flex;gap:10px}
 #log{flex:1 1 0;min-width:0;min-height:0}
-#tree{flex:1 1 0;min-width:0;min-height:0;overflow:auto;background:#000432;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:13px/1.6 ui-monospace,Consolas,monospace}
+#tree{flex:1 1 0;min-width:0;min-height:0;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:13px/1.6 ui-monospace,Consolas,monospace}
 #tree .th{color:var(--mut);font-size:12px;padding-bottom:6px;margin-bottom:4px;border-bottom:1px solid var(--line)}
 #tree .te{color:var(--mut)}
 #tree summary{cursor:pointer;color:var(--tx);padding:1px 0}
@@ -69,10 +73,11 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 <body>
 <header>
   <h1>Folder Sync</h1>
+  <div class="proj"><button id="bPE">EXTOS</button><button id="bPF">FFTBOT</button></div>
   <span class="pill" id="pill" data-s="idle"><i></i><span id="pillTxt">No folder</span></span>
 </header>
 
-<div id="done">Done. The folder is up to date. Load unpacked in Chrome from this folder; keep this page open while you edit.</div>
+<div id="done"></div>
 
 <div class="row">
   
@@ -88,9 +93,9 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 <div id="info">No folder connected.</div>
 
 <div class="row">
-  <button class="main ic" id="bSysn" title="Create EXTOS folder &amp; sync" aria-label="Create EXTOS folder and sync"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg></button>
+  <button class="main ic" id="bSysn"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg></button>
     <button class="ic" id="bOpen" title="Open folder" aria-label="Open folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 8z"/><path d="M7 10h15l-3 8H3z"/></svg></button>
-      <button class="ic" id="bZip" title="Download EXTOS.zip" aria-label="Download EXTOS.zip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
+      <button class="ic" id="bZip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
         <button class="ic danger" id="bRestore" title="Wipe folder and restore master" aria-label="Wipe folder and restore master"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
           <button class="ic" id="bMaster" title="Save current folder as master" aria-label="Save current folder as master"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
           <button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
@@ -104,12 +109,24 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 
 <script>
 'use strict';
+// ───────── Projects ─────────
+// EXTOS (default) keeps EXACTLY the same cloud path and storage keys as before.
+// FFTBOT is opened with  <this page's address>#fftbot  and has its own cloud path, folder and storage.
+const PROJECTS = {
+  extos:  { name: 'EXTOS',  db: 'extSync/main',   sfx: '',        picker: 'extsync',        pickerParent: 'extsyncparent' },
+  fftbot: { name: 'FFTBOT', db: 'extSync/fftbot', sfx: '.fftbot', picker: 'extsync-fftbot', pickerParent: 'extsyncparent-fftbot' }
+};
+const PK = /^#fftbot$/i.test(location.hash) ? 'fftbot' : 'extos';
+const P = PROJECTS[PK];
+document.documentElement.dataset.p = PK;
+document.title = P.name + ' Sync';
+
 // ───────── Settings ─────────
-const VERSION   = '0.4';
+const VERSION   = '0.5';
 const DB_URL    = 'https://system-data-bf026-default-rtdb.asia-southeast1.firebasedatabase.app';
-const DB_PATH   = 'extSync/main';          // the ONLY branch this page touches
+const DB_PATH   = P.db;                     // the ONLY branch this page touches for this project
 const POLL_MS   = 3000;
-const SYSN_NAME = 'EXTOS';                  // folder created automatically inside the location you pick
+const SYSN_NAME = P.name;                   // folder created automatically inside the location you pick
 const MAX_BYTES = 5 * 1024 * 1024;         // larger files are skipped (with a warning)
 const SKIP_DIRS = new Set(['.git', 'node_modules']);
 const SKIP_FILE = /(^|\/)(\.DS_Store|Thumbs\.db|desktop\.ini)$|\.crswap$|~$/;
@@ -129,6 +146,17 @@ const DEVICE = (function () {
   if (!d) { d = Math.random().toString(36).slice(2, 8); localStorage.setItem('extsync.device', d); }
   return d;
 })();
+
+// project labels and switcher
+$('bSysn').title = 'Create ' + P.name + ' folder & sync';
+$('bSysn').setAttribute('aria-label', 'Create ' + P.name + ' folder and sync');
+$('bZip').title = 'Download ' + P.name + '.zip';
+$('bZip').setAttribute('aria-label', 'Download ' + P.name + '.zip');
+$('bPE').className = PK === 'extos' ? 'on' : '';
+$('bPF').className = PK === 'fftbot' ? 'on' : '';
+$('bPE').onclick = function () { if (PK !== 'extos') { location.hash = 'extos'; location.reload(); } };
+$('bPF').onclick = function () { if (PK !== 'fftbot') { location.hash = 'fftbot'; location.reload(); } };
+window.addEventListener('hashchange', function () { location.reload(); });
 
 const lines = [];
 const logEl = $('log');
@@ -172,7 +200,8 @@ async function sha(buf) {
 }
 const short = h => h ? h.slice(0, 8) : '-';
 
-// ───────── Tiny IndexedDB (remembers the chosen folder) ─────────
+// ───────── Tiny IndexedDB (remembers the chosen folder, one key per project) ─────────
+const HANDLE_KEY = 'handle' + P.sfx;
 function idb() {
   return new Promise((res, rej) => {
     const r = indexedDB.open('extsync', 1);
@@ -224,9 +253,10 @@ async function dbOnce(method, sub, body, quiet) {
 
 // ───────── Local folder access ─────────
 let root = null;
-let base = JSON.parse(localStorage.getItem('extsync.base') || '{}');   // path → hash at last sync
+const BASE_KEY = 'extsync.base' + P.sfx;
+let base = JSON.parse(localStorage.getItem(BASE_KEY) || '{}');   // path → hash at last sync
 const hcache = new Map();                                              // path → {m,s,h}
-const saveBase = () => localStorage.setItem('extsync.base', JSON.stringify(base));
+const saveBase = () => localStorage.setItem(BASE_KEY, JSON.stringify(base));
 
 async function scan(dir, prefix, out) {
   for await (const [name, h] of dir.entries()) {
@@ -393,8 +423,8 @@ async function cycle(why) {
     if (e.name === 'NotFoundError') {
           if (timer) { clearInterval(timer); timer = null; }
           root = null;
-          setStatus('paused', 'Folder missing: click EXTOS icon');
-          log('err', 'connected folder no longer exists (deleted or moved). Auto-sync stopped, cloud untouched. Click the EXTOS icon to reconnect.');
+          setStatus('paused', 'Folder missing: click ' + P.name + ' icon');
+          log('err', 'connected folder no longer exists (deleted or moved). Auto-sync stopped, cloud untouched. Click the ' + P.name + ' icon to reconnect.');
           return;
         }
         setStatus('error', e.message.indexOf('network') >= 0 ? 'Offline' : 'Error (see log)');
@@ -516,6 +546,9 @@ function startLoop() {
 async function useFolder(h, fresh) {
   root = h;
   announced = false;
+  $('done').textContent = PK === 'extos'
+    ? 'Done. The folder is up to date. Load unpacked in Chrome from this folder; keep this page open while you edit.'
+    : 'Done. The folder is up to date. Keep this page open while you edit.';
   $('done').style.display = 'none';
   $('bResume').style.display = 'none';
   if (fresh) { base = {}; hcache.clear(); saveBase(); }
@@ -526,16 +559,16 @@ async function useFolder(h, fresh) {
 async function pickFolder() {
   if (!window.showDirectoryPicker) { log('err', 'showDirectoryPicker is not available: use desktop Chrome or Edge over https'); return; }
   let h;
-  try { h = await window.showDirectoryPicker({ mode: 'readwrite', id: 'extsync' }); }
+  try { h = await window.showDirectoryPicker({ mode: 'readwrite', id: P.picker }); }
   catch (e) { log('warn', 'folder picker closed: ' + e.name); return; }
-  await idbSet('handle', h);
+  await idbSet(HANDLE_KEY, h);
   await useFolder(h, true);
 }
 async function setupSysn() {
   if (!window.showDirectoryPicker) { log('err', 'showDirectoryPicker is not available: use desktop Chrome or Edge over https'); return; }
-  log('info', 'EXTOS setup: pick where the EXTOS folder should be created (browser will ask for permission)');
+  log('info', P.name + ' setup: pick where the ' + P.name + ' folder should be created (browser will ask for permission)');
   var parent, h, existed = true;
-  try { parent = await window.showDirectoryPicker({ mode: 'readwrite', id: 'extsyncparent', startIn: 'documents' }); }
+  try { parent = await window.showDirectoryPicker({ mode: 'readwrite', id: P.pickerParent, startIn: 'documents' }); }
   catch (e) { log('warn', 'SYSN setup cancelled: ' + e.name); return; }
   try {
     if (parent.name === SYSN_NAME) { h = parent; }
@@ -545,12 +578,12 @@ async function setupSysn() {
     }
   } catch (e) { log('err', 'could not create ' + SYSN_NAME + ': ' + e.message); return; }
   log('ok', 'permission granted · folder ' + SYSN_NAME + (existed ? ' ready (already existed)' : ' CREATED') + ' inside "' + parent.name + '"');
-  await idbSet('handle', h);
+  await idbSet(HANDLE_KEY, h);
   await useFolder(h, true);
-  log('ok', 'EXTOS connected: cloud files downloaded, auto-sync running (add/edit/delete syncs both ways)');
+  log('ok', P.name + ' connected: cloud files downloaded, auto-sync running (add/edit/delete syncs both ways)');
 }
 async function resumeFolder() {
-  const h = await idbGet('handle');
+  const h = await idbGet(HANDLE_KEY);
   if (!h) return;
   const p = await h.requestPermission({ mode: 'readwrite' });
   log('info', 'folder permission: ' + p);
@@ -608,7 +641,7 @@ async function deleteFile(p) {
   } catch (e) { log('err', 'delete ' + p + ' failed: ' + e.message); }
 }
 async function openFolder() {
-  if (!root) { log('warn', 'connect the EXTOS folder first'); return; }
+  if (!root) { log('warn', 'connect the ' + P.name + ' folder first'); return; }
   try { await window.showDirectoryPicker({ mode: 'read', startIn: root }); }
   catch (e) { /* dialog closed */ }
 }
@@ -630,8 +663,8 @@ async function pruneEmpty(dir) {
   return empty;
 }
 async function saveMaster() {
-  if (!root) { log('warn', 'connect the EXTOS folder first'); return; }
-  if (!confirm('Save the current folder as the new master version?\nThis replaces the previously saved master.')) return;
+  if (!root) { log('warn', 'connect the ' + P.name + ' folder first'); return; }
+  if (!confirm('Save the current ' + P.name + ' folder as the new master version?\nThis replaces the previously saved ' + P.name + ' master.')) return;
   await lockSync();
   try {
     setStatus('syncing', 'Saving master…');
@@ -654,12 +687,12 @@ async function saveMaster() {
   finally { busy = false; }
 }
 async function restoreMaster() {
-  if (!root) { log('warn', 'connect the EXTOS folder first'); return; }
+  if (!root) { log('warn', 'connect the ' + P.name + ' folder first'); return; }
   var info = null;
   try { info = await db('GET', 'master/info', undefined, true); }
   catch (e) { log('err', 'cannot reach cloud: ' + e.message); return; }
   if (!info) { log('warn', 'no master saved yet: use the save-master button first'); return; }
-  if (!confirm('WIPE the current folder and restore the master saved ' + new Date(info.savedAt).toLocaleString() + ' (' + info.count + ' files)?\n\nFiles that are not in the master will be deleted here and in the cloud.')) return;
+  if (!confirm('WIPE the current ' + P.name + ' folder and restore the master saved ' + new Date(info.savedAt).toLocaleString() + ' (' + info.count + ' files)?\n\nFiles that are not in the master will be deleted here and in the cloud.')) return;
   var wiping = false;
   await lockSync();
   try {
@@ -713,11 +746,11 @@ function crc32(b) {
   return (c ^ 0xFFFFFFFF) >>> 0;
 }
 async function downloadZip() {
-  if (!root) { log('warn', 'connect the EXTOS folder first'); return; }
+  if (!root) { log('warn', 'connect the ' + P.name + ' folder first'); return; }
   try {
     var fh = null;
         if (window.showSaveFilePicker) {
-          try { fh = await window.showSaveFilePicker({ suggestedName: 'EXTOS.zip', types: [{ description: 'ZIP archive', accept: { 'application/zip': ['.zip'] } }] }); }
+          try { fh = await window.showSaveFilePicker({ suggestedName: P.name + '.zip', types: [{ description: 'ZIP archive', accept: { 'application/zip': ['.zip'] } }] }); }
           catch (e) { if (e.name === 'AbortError') { log('warn', 'zip save cancelled'); return; } log('warn', 'save dialog unavailable: ' + e.name); }
         }
         var handles = new Map();
@@ -753,14 +786,14 @@ async function downloadZip() {
           var w = await fh.createWritable();
           await w.write(blob);
           await w.close();
-          log('ok', 'EXTOS.zip saved (' + ents.length + ' files, ' + blob.size + ' B)');
+          log('ok', P.name + '.zip saved (' + ents.length + ' files, ' + blob.size + ' B)');
           return;
         }
         var url = URL.createObjectURL(blob), a = document.createElement('a');
-    a.href = url; a.download = 'EXTOS.zip';
+    a.href = url; a.download = P.name + '.zip';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
-    log('ok', 'EXTOS.zip downloaded (' + ents.length + ' files, ' + blob.size + ' B)');
+    log('ok', P.name + '.zip downloaded (' + ents.length + ' files, ' + blob.size + ' B)');
   } catch (e) { log('err', 'zip failed: ' + e.message); }
 }
 $('bOpen').onclick = openFolder;
@@ -823,8 +856,8 @@ window.addEventListener('unhandledrejection', e => log('err', 'unhandled: ' + (e
 
 // ───────── Startup ─────────
 (async function init() {
-  log('info', 'Folder Sync v' + VERSION + ' · device ' + DEVICE);
-    try { if (navigator.locks) navigator.locks.request('extsync-keepalive', function () { return new Promise(function () {}); }); } catch (e) {}
+  log('info', 'Folder Sync v' + VERSION + ' · project ' + P.name + ' · device ' + DEVICE);
+    try { if (navigator.locks) navigator.locks.request('extsync-keepalive' + P.sfx, function () { return new Promise(function () {}); }); } catch (e) {}
     keepPrompt();
   log('info', 'browser: ' + navigator.userAgent);
   log('info', 'secure context: ' + window.isSecureContext + ' · folder API: ' + !!window.showDirectoryPicker + ' · crypto: ' + !!(window.crypto && crypto.subtle));
@@ -835,12 +868,12 @@ window.addEventListener('unhandledrejection', e => log('err', 'unhandled: ' + (e
     setStatus('idle', 'No folder');
   } catch (e) { log('err', 'cloud check failed: ' + e.message); setStatus('error', 'Cloud unreachable'); }
   try {
-    const h = await idbGet('handle');
+    const h = await idbGet(HANDLE_KEY);
     if (h) {
       const p = await h.queryPermission({ mode: 'readwrite' });
       log('info', 'saved folder "' + h.name + '", permission: ' + p);
       if (p === 'granted') await useFolder(h, false);
-      else { $('bResume').style.display = ''; $('bResume').textContent = 'Reconnect "' + h.name + '"'; setStatus('paused', 'Click EXTOS icon to reconnect'); }
+      else { $('bResume').style.display = ''; $('bResume').textContent = 'Reconnect "' + h.name + '"'; setStatus('paused', 'Click ' + P.name + ' icon to reconnect'); }
     }
   } catch (e) { log('warn', 'could not restore saved folder: ' + e.message); }
 })();
