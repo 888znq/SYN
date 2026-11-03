@@ -95,6 +95,7 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
   <button class="main ic" id="bSysn"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg></button>
     <button class="ic" id="bOpen" title="Open folder" aria-label="Open folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 8z"/><path d="M7 10h15l-3 8H3z"/></svg></button>
       <button class="ic" id="bZip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
+      <button class="ic" id="bRepo" title="Download BCKBOT repo as zip" aria-label="Download BCKBOT repo as zip"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
         <button class="ic danger" id="bRestore" title="Wipe folder and restore master" aria-label="Wipe folder and restore master"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
           <button class="ic" id="bMaster" title="Save current folder as master" aria-label="Save current folder as master"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
           <button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
@@ -791,6 +792,16 @@ async function downloadZip() {
 }
 $('bOpen').onclick = openFolder;
 $('bZip').onclick = downloadZip;
+$('bRepo').onclick = function () {
+  var a = document.createElement('a');
+  a.href = 'https://github.com/888znq/BCKBOT/archive/HEAD.zip';
+  a.download = 'BCKBOT.zip';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  log('ok', 'BCKBOT repo zip download started');
+};
 $('bMaster').onclick = saveMaster;
 $('bRestore').onclick = restoreMaster;
 $('bPick').onclick = pickFolder;
