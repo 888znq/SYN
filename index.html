@@ -61,12 +61,12 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 #tree .cld i{background:var(--warn)}
 #tree .diff i{background:var(--err)}
 @media(max-width:700px){#panes{flex-direction:column}}
-.row:not(:has(#bCopy)){display:none}
+.row:not(:has(#bSysn)){display:none}
 #panes{order:50}
 #bOpen{display:none!important}
-.row:has(#bCopy){order:100;justify-content:space-around;gap:0;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
-.row:has(#bCopy) button.ic{width:46px;height:46px}
-.row:has(#bCopy) button.ic svg{width:22px;height:22px}
+.row:has(#bSysn){order:100;justify-content:space-around;gap:0;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.row:has(#bSysn) button.ic{width:46px;height:46px}
+.row:has(#bSysn) button.ic svg{width:22px;height:22px}
 #bPE{color:#c792ea;border-color:#c792ea}
 #bSysn{color:#4fd1a1;border-color:#4fd1a1}
 #bZip{color:#7db4ff;border-color:#7db4ff}
@@ -80,6 +80,24 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 #bKeepLink{color:#c792ea;border-color:#c792ea}
 #bKeepX{color:#ff5d73;border-color:#ff5d73}
 button.ic:hover,#bPE:hover{filter:brightness(1.3)}
+#bZip,#bRepo{display:none!important}
+#logbox{position:relative;flex:1 1 0;min-width:0;min-height:0;display:flex}
+#logbox #log{padding-right:54px;border-color:#2f5fb3;border-radius:14px}
+#logbox #bCopy{position:absolute;top:10px;right:24px;z-index:2;border-radius:10px}
+#tree{border-color:#5a3fa0;border-radius:14px}
+#log,#tree{scrollbar-width:thin;scrollbar-color:#2f5fb3 transparent}
+#tree .tf{padding:2px 6px;border-radius:6px}
+#tree .tf:hover{background:rgba(125,180,255,.1)}
+.pill{box-shadow:0 0 16px rgba(125,180,255,.18)}
+.pill[data-s=synced]{border-color:var(--ok)}
+.pill[data-s=syncing]{border-color:var(--up)}
+.pill[data-s=error]{border-color:var(--err)}
+.pill[data-s=paused]{border-color:var(--warn)}
+#keep{border-radius:14px}
+button.ic{transition:transform .15s,filter .15s}
+button.ic:hover{transform:translateY(-2px)}
+.row:has(#bSysn){border-radius:18px;padding:10px 16px;box-shadow:0 10px 28px rgba(0,0,0,.5)}
+.row:has(#bSysn) button.ic{border-radius:14px;border-width:1.5px}
 </style>
 </head>
 <body>
@@ -109,15 +127,15 @@ button.ic:hover,#bPE:hover{filter:brightness(1.3)}
     <button class="ic" id="bOpen" title="Open folder" aria-label="Open folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 8z"/><path d="M7 10h15l-3 8H3z"/></svg></button>
       <button class="ic" id="bZip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
       <button class="ic" id="bRepo" title="Download BCKBOT repo folder" aria-label="Download BCKBOT repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
-        <button class="ic" id="bBig" title="Download WWW.zip from archive.org (opens a new tab)" aria-label="Download WWW.zip from archive.org (opens a new tab)"><svg viewBox="0 0 24 24"><path d="M12 3v11M8 10l4 4 4-4"/><path d="M4 17v3h16v-3"/></svg></button>
+        <button class="ic" id="bBig" title="Download WWW.zip from archive.org (opens a new tab)" aria-label="Download WWW.zip from archive.org (opens a new tab)"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></svg></button>
         <button class="ic danger" id="bRestore" title="Wipe folder and restore master" aria-label="Wipe folder and restore master"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
           <button class="ic" id="bMaster" title="Save current folder as master" aria-label="Save current folder as master"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
-          <button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
+          <!-- copy log button moved into the log pane -->
   <button class="ic" id="bClear" title="Clear log" aria-label="Clear log"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
 </div>
 <div id="keep"><span id="keepTxt"></span><button id="bKeepSite" title="Copy this site's address">Copy site</button><button id="bKeepLink" title="Copy the browser settings link">Copy settings link</button><button id="bKeepX" title="Dismiss" aria-label="Dismiss">✕</button></div>
 <div id="panes">
-  <div id="log" aria-live="off"></div>
+  <div id="logbox"><div id="log" aria-live="off"></div><button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button></div>
   <div id="tree"><div class="te">No folder connected</div></div>
 </div>
 
@@ -134,7 +152,7 @@ document.documentElement.dataset.p = PK;
 document.title = P.name + ' Sync';
 
 // ───────── Settings ─────────
-const VERSION   = '0.9';
+const VERSION   = '1.1';
 const DB_URL    = 'https://system-data-bf026-default-rtdb.asia-southeast1.firebasedatabase.app';
 const DB_PATH   = P.db;                     // the ONLY branch this page touches for this project
 const POLL_MS   = 3000;
