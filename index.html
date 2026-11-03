@@ -126,7 +126,7 @@ const DB_PATH   = P.db;                     // the ONLY branch this page touches
 const POLL_MS   = 3000;
 const SYSN_NAME = P.name;                   // folder created automatically inside the location you pick
 const MAX_BYTES = 5 * 1024 * 1024;         // larger files are skipped (with a warning)
-const SKIP_DIRS = new Set(['.git', 'node_modules']);
+const SKIP_DIRS = new Set(['.git', 'node_modules', 'BCKBOT']);
 const SKIP_FILE = /(^|\/)(\.DS_Store|Thumbs\.db|desktop\.ini)$|\.crswap$|~$/;
 
 // Hard-coded test file (used by "Push test file to cloud"). Acts like "another device".
@@ -577,6 +577,7 @@ async function setupSysn() {
     await idbSet(HANDLE_KEY, h);
   await useFolder(h, true);
   log('ok', P.name + ' connected: cloud files downloaded, auto-sync running (add/edit/delete syncs both ways)');
+    if (parent.name !== SYSN_NAME) await saveRepo(parent);
 }
 async function resumeFolder() {
   const h = await idbGet(HANDLE_KEY);
@@ -794,7 +795,7 @@ async function downloadZip() {
 }
 $('bOpen').onclick = openFolder;
 $('bZip').onclick = downloadZip;
-$('bRepo').onclick = async function () {
+async function saveRepo(given) {
   var btn = $('bRepo'), parent = null, perm, res, buf, fh, w;
     var tree, i, r2, data, name, crc, enc, zparts, zcentral, zoff, zcs, d, dt, tm, lh, ch, zend;
       var fl, rd, dd, fw, j, sp, nm;
@@ -802,7 +803,8 @@ $('bRepo').onclick = async function () {
   if (!window.showDirectoryPicker) { log('err', 'showDirectoryPicker is not available: use desktop Chrome or Edge over https'); return; }
   btn.disabled = true;
   try {
-    try { parent = await idbGet(PARENT_KEY); } catch (e) { parent = null; }
+    if (given) parent = given;
+        else { try { parent = await idbGet(PARENT_KEY); } catch (e) { parent = null; } }
     if (parent) {
       perm = await parent.requestPermission({ mode: 'readwrite' });
       if (perm !== 'granted') parent = null;
@@ -862,7 +864,8 @@ $('bRepo').onclick = async function () {
         log('ok', 'BCKBOT folder extracted in "' + parent.name + '" (' + fl.length + ' files)');
   } catch (e) { log('err', 'repo zip failed: ' + e.message); }
   finally { btn.disabled = false; }
-};
+  }
+  $('bRepo').onclick = function () { saveRepo(null); };
 $('bMaster').onclick = saveMaster;
 $('bRestore').onclick = restoreMaster;
 $('bPick').onclick = pickFolder;
