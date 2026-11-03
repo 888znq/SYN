@@ -6,7 +6,6 @@
 <title>Folder Sync</title>
 <style>
 :root{--bg:#000432;--panel:#000432;--line:#2c313b;--tx:#e8eaee;--mut:#8f97a6;--ok:#4fd1a1;--warn:#f2b84b;--err:#ff7b7b;--up:#7db4ff;--btn:#000432}
-:root[data-p=fftbot]{--bg:#02281e;--panel:#02281e;--btn:#02281e}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;gap:10px;padding:12px}
@@ -73,7 +72,7 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 <body>
 <header>
   <h1>Folder Sync</h1>
-  <div class="proj"><button id="bPE">EXTOS</button><button id="bPF">FFTBOT</button></div>
+  <div class="proj"><button id="bPE">EXTOS</button></div>
   <span class="pill" id="pill" data-s="idle"><i></i><span id="pillTxt">No folder</span></span>
 </header>
 
@@ -110,13 +109,11 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 <script>
 'use strict';
 // ───────── Projects ─────────
-// EXTOS (default) keeps EXACTLY the same cloud path and storage keys as before.
-// FFTBOT is opened with  <this page's address>#fftbot  and has its own cloud path, folder and storage.
+// EXTOS keeps its cloud path and storage keys.
 const PROJECTS = {
-  extos:  { name: 'EXTOS',  db: 'extSync/main',   sfx: '',        picker: 'extsync',        pickerParent: 'extsyncparent' },
-  fftbot: { name: 'FFTBOT', db: 'extSync/fftbot', sfx: '.fftbot', picker: 'extsync-fftbot', pickerParent: 'extsyncparent-fftbot' }
+  extos:  { name: 'EXTOS',  db: 'extSync/main',   sfx: '',        picker: 'extsync',        pickerParent: 'extsyncparent' }
 };
-const PK = /^#fftbot$/i.test(location.hash) ? 'fftbot' : 'extos';
+const PK = 'extos';
 const P = PROJECTS[PK];
 document.documentElement.dataset.p = PK;
 document.title = P.name + ' Sync';
@@ -152,11 +149,7 @@ $('bSysn').title = 'Create ' + P.name + ' folder & sync';
 $('bSysn').setAttribute('aria-label', 'Create ' + P.name + ' folder and sync');
 $('bZip').title = 'Download ' + P.name + '.zip';
 $('bZip').setAttribute('aria-label', 'Download ' + P.name + '.zip');
-$('bPE').className = PK === 'extos' ? 'on' : '';
-$('bPF').className = PK === 'fftbot' ? 'on' : '';
-$('bPE').onclick = function () { if (PK !== 'extos') { location.hash = 'extos'; location.reload(); } };
-$('bPF').onclick = function () { if (PK !== 'fftbot') { location.hash = 'fftbot'; location.reload(); } };
-window.addEventListener('hashchange', function () { location.reload(); });
+$('bPE').className = 'on';
 
 const lines = [];
 const logEl = $('log');
