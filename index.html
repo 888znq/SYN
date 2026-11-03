@@ -196,6 +196,7 @@ const short = h => h ? h.slice(0, 8) : '-';
 
 // ───────── Tiny IndexedDB (remembers the chosen folder, one key per project) ─────────
 const HANDLE_KEY = 'handle' + P.sfx;
+const PARENT_KEY = 'parent' + P.sfx;
 function idb() {
   return new Promise((res, rej) => {
     const r = indexedDB.open('extsync', 1);
@@ -572,7 +573,8 @@ async function setupSysn() {
     }
   } catch (e) { log('err', 'could not create ' + SYSN_NAME + ': ' + e.message); return; }
   log('ok', 'permission granted · folder ' + SYSN_NAME + (existed ? ' ready (already existed)' : ' CREATED') + ' inside "' + parent.name + '"');
-  await idbSet(HANDLE_KEY, h);
+    if (parent.name !== SYSN_NAME) await idbSet(PARENT_KEY, parent);
+    await idbSet(HANDLE_KEY, h);
   await useFolder(h, true);
   log('ok', P.name + ' connected: cloud files downloaded, auto-sync running (add/edit/delete syncs both ways)');
 }
@@ -792,15 +794,74 @@ async function downloadZip() {
 }
 $('bOpen').onclick = openFolder;
 $('bZip').onclick = downloadZip;
-$('bRepo').onclick = function () {
-  var a = document.createElement('a');
-  a.href = 'https://github.com/888znq/BCKBOT/archive/HEAD.zip';
-  a.download = 'BCKBOT.zip';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  log('ok', 'BCKBOT repo zip download started');
+$('bRepo').onclick = async function () {
+  var btn = $('bRepo'), parent = null, perm, res, buf, fh, w;
+    var tree, i, r2, data, name, crc, enc, zparts, zcentral, zoff, zcs, d, dt, tm, lh, ch, zend;
+      var fl, rd, dd, fw, j, sp, nm;
+  if (btn.disabled) return;
+  if (!window.showDirectoryPicker) { log('err', 'showDirectoryPicker is not available: use desktop Chrome or Edge over https'); return; }
+  btn.disabled = true;
+  try {
+    try { parent = await idbGet(PARENT_KEY); } catch (e) { parent = null; }
+    if (parent) {
+      perm = await parent.requestPermission({ mode: 'readwrite' });
+      if (perm !== 'granted') parent = null;
+    }
+    if (!parent) {
+      try { parent = await window.showDirectoryPicker({ mode: 'readwrite', id: P.pickerParent, startIn: 'pictures' }); }
+      catch (e) { log('warn', 'repo save cancelled: ' + e.name); return; }
+      if (parent.name === SYSN_NAME) { log('warn', 'pick the folder that contains ' + SYSN_NAME + ', not ' + SYSN_NAME + ' itself'); return; }
+      await idbSet(PARENT_KEY, parent);
+    }
+    log('info', 'downloading BCKBOT repo from GitHub…');
+    res = await fetch('https://api.github.com/repos/888znq/BCKBOT/git/trees/HEAD?recursive=1');
+        if (!res.ok) throw new Error('GitHub answered ' + res.status);
+        tree = (await res.json()).tree.filter(function (n) { return n.type === 'blob'; });
+        if (!tree.length) throw new Error('repo is empty');
+        enc = new TextEncoder(); zparts = []; zcentral = []; zoff = 0; zcs = 0; d = new Date(); fl = [];
+        dt = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+        tm = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF;
+        for (i = 0; i < tree.length; i++) {
+          r2 = await fetch('https://raw.githubusercontent.com/888znq/BCKBOT/HEAD/' + tree[i].path.split('/').map(encodeURIComponent).join('/'));
+          if (!r2.ok) throw new Error('GitHub answered ' + r2.status + ' for ' + tree[i].path);
+          data = new Uint8Array(await r2.arrayBuffer());
+                fl.push({ p: tree[i].path, data: data });
+                name = enc.encode(tree[i].path); crc = crc32(data);
+          lh = new DataView(new ArrayBuffer(30));
+          lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+          lh.setUint16(8, 0, true); lh.setUint16(10, tm, true); lh.setUint16(12, dt, true);
+          lh.setUint32(14, crc, true); lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true);
+          lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+          ch = new DataView(new ArrayBuffer(46));
+          ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true);
+          ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true); ch.setUint16(12, tm, true); ch.setUint16(14, dt, true);
+          ch.setUint32(16, crc, true); ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true);
+          ch.setUint16(28, name.length, true); ch.setUint32(42, zoff, true);
+          zparts.push(lh.buffer, name, data);
+          zcentral.push(ch.buffer, name);
+          zcs += 46 + name.length;
+          zoff += 30 + name.length + data.length;
+        }
+        zend = new DataView(new ArrayBuffer(22));
+        zend.setUint32(0, 0x06054b50, true); zend.setUint16(8, tree.length, true); zend.setUint16(10, tree.length, true);
+        zend.setUint32(12, zcs, true); zend.setUint32(16, zoff, true);
+        buf = new Blob(zparts.concat(zcentral, [zend.buffer]), { type: 'application/zip' });
+    fh = await parent.getFileHandle('BCKBOT.zip', { create: true });
+    w = await fh.createWritable();
+    await w.write(buf);
+    await w.close();
+    log('ok', 'BCKBOT.zip saved in "' + parent.name + '" next to ' + SYSN_NAME + ' (' + tree.length + ' files, ' + buf.size + ' B)');
+        rd = await parent.getDirectoryHandle('BCKBOT', { create: true });
+        for (i = 0; i < fl.length; i++) {
+          sp = fl[i].p.split('/'); nm = sp.pop(); dd = rd;
+          for (j = 0; j < sp.length; j++) dd = await dd.getDirectoryHandle(sp[j], { create: true });
+          fw = await (await dd.getFileHandle(nm, { create: true })).createWritable();
+          await fw.write(fl[i].data);
+          await fw.close();
+        }
+        log('ok', 'BCKBOT folder extracted in "' + parent.name + '" (' + fl.length + ' files)');
+  } catch (e) { log('err', 'repo zip failed: ' + e.message); }
+  finally { btn.disabled = false; }
 };
 $('bMaster').onclick = saveMaster;
 $('bRestore').onclick = restoreMaster;
