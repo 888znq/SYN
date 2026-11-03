@@ -67,6 +67,19 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
 .row:has(#bCopy){order:100;justify-content:space-around;gap:0;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
 .row:has(#bCopy) button.ic{width:46px;height:46px}
 .row:has(#bCopy) button.ic svg{width:22px;height:22px}
+#bPE{color:#c792ea;border-color:#c792ea}
+#bSysn{color:#4fd1a1;border-color:#4fd1a1}
+#bZip{color:#7db4ff;border-color:#7db4ff}
+#bRepo{color:#f2b84b;border-color:#f2b84b}
+#bBig{color:#ff8a5b;border-color:#ff8a5b}
+#bRestore{color:#ff5d73;border-color:#ff5d73}
+#bMaster{color:#2ee6d6;border-color:#2ee6d6}
+#bCopy{color:#b8e986;border-color:#b8e986}
+#bClear{color:#f78fb3;border-color:#f78fb3}
+#bKeepSite{color:#7db4ff;border-color:#7db4ff}
+#bKeepLink{color:#c792ea;border-color:#c792ea}
+#bKeepX{color:#ff5d73;border-color:#ff5d73}
+button.ic:hover,#bPE:hover{filter:brightness(1.3)}
 </style>
 </head>
 <body>
@@ -96,6 +109,7 @@ button.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:
     <button class="ic" id="bOpen" title="Open folder" aria-label="Open folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 8z"/><path d="M7 10h15l-3 8H3z"/></svg></button>
       <button class="ic" id="bZip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
       <button class="ic" id="bRepo" title="Download BCKBOT repo folder" aria-label="Download BCKBOT repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
+        <button class="ic" id="bBig" title="Download WWW.zip from archive.org (opens a new tab)" aria-label="Download WWW.zip from archive.org (opens a new tab)"><svg viewBox="0 0 24 24"><path d="M12 3v11M8 10l4 4 4-4"/><path d="M4 17v3h16v-3"/></svg></button>
         <button class="ic danger" id="bRestore" title="Wipe folder and restore master" aria-label="Wipe folder and restore master"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
           <button class="ic" id="bMaster" title="Save current folder as master" aria-label="Save current folder as master"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
           <button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
@@ -120,7 +134,7 @@ document.documentElement.dataset.p = PK;
 document.title = P.name + ' Sync';
 
 // ───────── Settings ─────────
-const VERSION   = '0.6';
+const VERSION   = '0.9';
 const DB_URL    = 'https://system-data-bf026-default-rtdb.asia-southeast1.firebasedatabase.app';
 const DB_PATH   = P.db;                     // the ONLY branch this page touches for this project
 const POLL_MS   = 3000;
@@ -841,7 +855,66 @@ async function saveRepo(given) {
   } catch (e) { log('err', 'repo folder save failed: ' + e.message); }
   finally { btn.disabled = false; }
   }
+  var BIG_URL = 'https://archive.org/download/wwwwwwww_202611/WWW.zip';
+  var BIG_NAME = 'WWW.zip';
+  async function bigProbe() {
+    var pr;
+    try {
+      pr = await fetch(BIG_URL, { method: 'HEAD', mode: 'no-cors' });
+      log('warn', 'probe: archive.org is reachable (' + pr.type + ') but the normal request was blocked by cross-site rules (CORS), so this page cannot read the file');
+    } catch (x) {
+      log('warn', 'probe: archive.org cannot be reached from this browser (' + x.name + ': ' + x.message + '), check internet, VPN, ad blocker or firewall');
+    }
+  }
+  async function saveBig() {
+    var btn = $('bBig'), parent = null, perm, res, total, rd, w = null, got = 0, last = 0, r, t0;
+    if (btn.disabled) return;
+    if (!window.showDirectoryPicker) { log('err', 'showDirectoryPicker is not available: use desktop Chrome or Edge over https'); return; }
+    btn.disabled = true;
+    try {
+      try { parent = await idbGet(PARENT_KEY); } catch (e) { parent = null; }
+      if (parent) {
+        perm = await parent.requestPermission({ mode: 'readwrite' });
+        if (perm !== 'granted') parent = null;
+      }
+      if (!parent) {
+        try { parent = await window.showDirectoryPicker({ mode: 'readwrite', id: P.pickerParent, startIn: 'pictures' }); }
+        catch (e) { log('warn', BIG_NAME + ' download cancelled: ' + e.name); return; }
+        if (parent.name === SYSN_NAME) { log('warn', 'pick the folder that contains ' + SYSN_NAME + ', not ' + SYSN_NAME + ' itself'); return; }
+        await idbSet(PARENT_KEY, parent);
+      }
+      log('info', 'downloading ' + BIG_NAME + ' from archive.org…');
+      log('net', 'GET ' + BIG_URL);
+          res = await fetch(BIG_URL);
+          log('net', 'archive.org answered ' + res.status + (res.redirected ? ' via redirect to ' + res.url : '') + ' · ' + res.type + ' · ' + (res.headers.get('content-length') || 'size unknown') + ' B');
+      if (!res.ok || !res.body) throw new Error('archive.org answered ' + res.status);
+      total = +res.headers.get('content-length') || 0;
+      w = await (await parent.getFileHandle(BIG_NAME, { create: true })).createWritable();
+      rd = res.body.getReader();
+      t0 = Date.now();
+      while (true) {
+        r = await rd.read();
+        if (r.done) break;
+        await w.write(r.value);
+        got += r.value.length;
+        if (Date.now() - last > 3000) {
+          last = Date.now();
+          log('net', BIG_NAME + ': ' + Math.round(got / 1048576) + (total ? ' / ' + Math.round(total / 1048576) : '') + ' MB');
+        }
+      }
+      if (total && got !== total) throw new Error('incomplete download (' + got + ' of ' + total + ' B)');
+      await w.close();
+      w = null;
+      log('ok', BIG_NAME + ' saved in "' + parent.name + '" (' + Math.round(got / 1048576) + ' MB, ' + Math.round((Date.now() - t0) / 1000) + ' s)');
+    } catch (e) {
+      if (w) { try { await w.abort(); } catch (x) {} }
+      log('err', BIG_NAME + ' download failed: ' + e.name + ': ' + e.message + ' (' + Math.round(got / 1048576) + ' MB received)');
+          if (got === 0 && e.name === 'TypeError') await bigProbe();
+    }
+    finally { btn.disabled = false; }
+  }
   $('bRepo').onclick = function () { saveRepo(null); };
+  $('bBig').onclick = function () { log('info', 'opening ' + BIG_NAME + ' in a new tab'); window.open(BIG_URL, '_blank', 'noopener'); };
 $('bMaster').onclick = saveMaster;
 $('bRestore').onclick = restoreMaster;
 $('bPick').onclick = pickFolder;
