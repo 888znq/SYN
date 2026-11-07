@@ -884,18 +884,18 @@ async function saveRepo(given) {
       await idbSet(PARENT_KEY, parent);
     }
     log('info', 'downloading BCKBOT repo from GitHub…');
-    res = await fetch('https://api.github.com/repos/888znq/BCKBOT/git/trees/HEAD?recursive=1');
-        if (!res.ok) throw new Error('GitHub answered ' + res.status);
-        tree = (await res.json()).tree.filter(function (n) { return n.type === 'blob'; });
-        if (!tree.length) throw new Error('repo is empty');
-        fl = [];
-        for (i = 0; i < tree.length; i++) {
-          r2 = await fetch('https://raw.githubusercontent.com/888znq/BCKBOT/HEAD/' + tree[i].path.split('/').map(encodeURIComponent).join('/'));
-          if (!r2.ok) throw new Error('GitHub answered ' + r2.status + ' for ' + tree[i].path);
-          data = new Uint8Array(await r2.arrayBuffer());
-                fl.push({ p: tree[i].path, data: data });
-                
-        }
+        res = await fetch('https://api.github.com/repos/888znq/FFT/git/trees/HEAD?recursive=1');
+            if (!res.ok) throw new Error('GitHub answered ' + res.status);
+            tree = (await res.json()).tree.filter(function (n) { return n.type === 'blob'; });
+            if (!tree.length) throw new Error('repo is empty');
+            fl = [];
+            for (i = 0; i < tree.length; i++) {
+              r2 = await fetch('https://raw.githubusercontent.com/888znq/FFT/HEAD/' + tree[i].path.split('/').map(encodeURIComponent).join('/'));
+              if (!r2.ok) throw new Error('GitHub answered ' + r2.status + ' for ' + tree[i].path);
+              data = new Uint8Array(await r2.arrayBuffer());
+                    fl.push({ p: tree[i].path, data: data });
+                    
+            }
         
         rd = await parent.getDirectoryHandle('BCKBOT', { create: true });
         for (i = 0; i < fl.length; i++) {
