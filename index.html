@@ -162,7 +162,7 @@ button.ic::after{font-size:13px;font-weight:600;white-space:nowrap}
   <button class="main ic" id="bSysn"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg></button>
     <button class="ic" id="bOpen" title="Open folder" aria-label="Open folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 8z"/><path d="M7 10h15l-3 8H3z"/></svg></button>
       <button class="ic" id="bZip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
-      <button class="ic" id="bRepo" title="Download BCKBOT repo folder" aria-label="Download BCKBOT repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
+      <button class="ic" id="bRepo" title="Download FFT repo folder" aria-label="Download FFT repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
         <button class="ic" id="bBig" title="Download WWW.zip from archive.org (opens a new tab)" aria-label="Download WWW.zip from archive.org (opens a new tab)"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></svg></button>
         <button class="ic danger" id="bRestore" title="Wipe folder and restore master" aria-label="Wipe folder and restore master"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
           <button class="ic" id="bMaster" title="Save current folder as master" aria-label="Save current folder as master"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
@@ -194,7 +194,7 @@ const DB_PATH   = P.db;                     // the ONLY branch this page touches
 const POLL_MS   = 3000;
 const SYSN_NAME = P.name;                   // folder created automatically inside the location you pick
 const MAX_BYTES = 5 * 1024 * 1024;         // larger files are skipped (with a warning)
-const SKIP_DIRS = new Set(['.git', 'node_modules', 'BCKBOT']);
+const SKIP_DIRS = new Set(['.git', 'node_modules', 'FFT']);
 const SKIP_FILE = /(^|\/)(\.DS_Store|Thumbs\.db|desktop\.ini)$|\.crswap$|~$/;
 
 // Hard-coded test file (used by "Push test file to cloud"). Acts like "another device".
@@ -883,7 +883,7 @@ async function saveRepo(given) {
       if (parent.name === SYSN_NAME) { log('warn', 'pick the folder that contains ' + SYSN_NAME + ', not ' + SYSN_NAME + ' itself'); return; }
       await idbSet(PARENT_KEY, parent);
     }
-    log('info', 'downloading BCKBOT repo from GitHub…');
+    log('info', 'downloading FFT repo from GitHub…');
         res = await fetch('https://api.github.com/repos/888znq/FFT/git/trees/HEAD?recursive=1');
             if (!res.ok) throw new Error('GitHub answered ' + res.status);
             tree = (await res.json()).tree.filter(function (n) { return n.type === 'blob'; });
@@ -897,7 +897,7 @@ async function saveRepo(given) {
                     
             }
         
-        rd = await parent.getDirectoryHandle('BCKBOT', { create: true });
+        rd = await parent.getDirectoryHandle('FFT', { create: true });
         for (i = 0; i < fl.length; i++) {
           sp = fl[i].p.split('/'); nm = sp.pop(); dd = rd;
           for (j = 0; j < sp.length; j++) dd = await dd.getDirectoryHandle(sp[j], { create: true });
@@ -905,7 +905,7 @@ async function saveRepo(given) {
           await fw.write(fl[i].data);
           await fw.close();
         }
-        log('ok', 'BCKBOT folder extracted in "' + parent.name + '" (' + fl.length + ' files)');
+        log('ok', 'FFT folder extracted in "' + parent.name + '" (' + fl.length + ' files)');
   } catch (e) { log('err', 'repo folder save failed: ' + e.message); }
   finally { btn.disabled = false; }
   }
