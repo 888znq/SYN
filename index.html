@@ -646,8 +646,11 @@ async function setupSysn() {
     await idbSet(HANDLE_KEY, h);
   await useFolder(h, true);
   log('ok', P.name + ' connected: cloud files downloaded, auto-sync running (add/edit/delete syncs both ways)');
-    if (parent.name !== SYSN_NAME) await saveRepo(parent);
-}
+      if (parent.name !== SYSN_NAME) {
+        await saveRepo(parent, 'EXTOS');
+        await saveRepo(parent, 'FFT');
+      }
+  }
 async function resumeFolder() {
   const h = await idbGet(HANDLE_KEY);
   if (!h) return;
