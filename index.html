@@ -113,7 +113,7 @@ button.ic::after{font-size:13px;font-weight:600;white-space:nowrap}
 #bClear{order:3}
 #bSysn{order:4}
 #bBig{order:5}
-#bSysn::after{content:"Pictures"}
+#bSysn{display:none!important}
 #bBig::after{content:none}
 .row:has(#bSysn) #bBig{width:40px;padding:0;gap:0}
 #bRestore::after{content:"Restore"}
@@ -150,10 +150,18 @@ button.ic::after{font-size:13px;font-weight:600;white-space:nowrap}
   <button class="ic" id="bRepoEXTOS" title="Download EXTOS repo folder" aria-label="Download EXTOS repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
   <button class="ic" id="bBig" title="Download WWW.zip from archive.org (opens a new tab)" aria-label="Download WWW.zip from archive.org (opens a new tab)"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></svg></button>
   <button class="ic" id="bClear" title="Clear log" aria-label="Clear log"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
-</div>
-<div id="panes">
-  <div id="logbox"><div id="log" aria-live="off"></div><button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button></div>
-</div>
+      </div>
+      
+      <div class="row" id="setupRow" style="justify-content: center; padding: 20px; display: flex;">
+        <button class="main ic" id="bSysnCenter" style="width: auto; padding: 0 20px; gap: 10px;">
+          <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg>
+          Select Pictures Folder
+        </button>
+      </div>
+  
+      <div id="panes">
+        <div id="logbox"><div id="log" aria-live="off"></div><button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button></div>
+      </div>
 
 <script>
 'use strict';
@@ -234,6 +242,8 @@ async function scan(dir, prefix, out) {
 // ───────── Folder connect ─────────
 async function useFolder(h, fresh) {
   root = h;
+  $('setupRow').style.display = 'none';
+  document.querySelector('.row:has(#bSysn)').style.display = 'flex';
   log('ok', 'folder connected: "' + h.name + '"' + (fresh ? ' (new connection)' : ' (restored)'));
 }
 async function pickFolder() {
@@ -450,11 +460,10 @@ async function saveRepo(given, repoName) {
     finally { btn.disabled = false; }
   }
   $('bRepoFFT').onclick = function () { saveRepo(null, 'FFT'); };
-    $('bRepoEXTOS').onclick = function () { saveRepo(null, 'EXTOS'); };
-    $('bBig').onclick = function () { log('info', 'opening ' + BIG_NAME + ' in a new tab'); window.open(BIG_URL, '_blank', 'noopener'); };
-$('bPick').onclick = pickFolder;
-$('bSysn').onclick = setupSysn;
-$('bClear').onclick = () => { lines.length = 0; logEl.textContent = ''; };
+      $('bRepoEXTOS').onclick = function () { saveRepo(null, 'EXTOS'); };
+      $('bBig').onclick = function () { log('info', 'opening ' + BIG_NAME + ' in a new tab'); window.open(BIG_URL, '_blank', 'noopener'); };
+  $('bSysnCenter').onclick = setupSysn;
+  $('bClear').onclick = () => { lines.length = 0; logEl.textContent = ''; };
 $('bCopy').onclick = async () => {
   const text = lines.join('\n');
   try { await navigator.clipboard.writeText(text); log('ok', 'log copied (' + lines.length + ' lines)'); }
