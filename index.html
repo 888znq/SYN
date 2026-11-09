@@ -146,9 +146,7 @@ button.ic::after{font-size:13px;font-weight:600;white-space:nowrap}
   <button class="main ic" id="bSysn"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg></button>
   <button class="ic" id="bOpen" title="Open folder" aria-label="Open folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 8z"/><path d="M7 10h15l-3 8H3z"/></svg></button>
   <button class="ic" id="bZip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
-  <button class="ic" id="bRepoFFT" title="Download FFT repo folder" aria-label="Download FFT repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
-  <button class="ic" id="bRepoEXTOS" title="Download EXTOS repo folder" aria-label="Download EXTOS repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
-  <button class="ic" id="bBig" title="Download WWW.zip from archive.org (opens a new tab)" aria-label="Download WWW.zip from archive.org (opens a new tab)"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></svg></button>
+    <button class="ic" id="bBig" title="Download WWW.zip from archive.org (opens a new tab)" aria-label="Download WWW.zip from archive.org (opens a new tab)"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></svg></button>
   <button class="ic" id="bClear" title="Clear log" aria-label="Clear log"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
       </div>
       
@@ -360,9 +358,9 @@ async function saveRepo(given, repoName) {
     var tree, i, r2, data, name, crc, enc, zparts, zcentral, zoff, zcs, d, dt, tm, lh, ch, zend;
       var fl, rd, dd, fw, j, sp, nm;
   if (btn && btn.disabled) return;
-  if (!window.showDirectoryPicker) { log('err', 'showDirectoryPicker is not available: use desktop Chrome or Edge over https'); return; }
-  btn.disabled = true;
-  try {
+    if (!window.showDirectoryPicker) { log('err', 'showDirectoryPicker is not available: use desktop Chrome or Edge over https'); return; }
+    if (btn) btn.disabled = true;
+    try {
     if (given) parent = given;
         else { try { parent = await idbGet(PARENT_KEY); } catch (e) { parent = null; } }
     if (parent) {
@@ -455,14 +453,12 @@ async function saveRepo(given, repoName) {
     } catch (e) {
       if (w) { try { await w.abort(); } catch (x) {} }
       log('err', BIG_NAME + ' download failed: ' + e.name + ': ' + e.message + ' (' + Math.round(got / 1048576) + ' MB received)');
-          if (got === 0 && e.name === 'TypeError') await bigProbe();
-    }
-    finally { btn.disabled = false; }
-  }
-  $('bRepoFFT').onclick = function () { saveRepo(null, 'FFT'); };
-      $('bRepoEXTOS').onclick = function () { saveRepo(null, 'EXTOS'); };
-      $('bBig').onclick = function () { log('info', 'opening ' + BIG_NAME + ' in a new tab'); window.open(BIG_URL, '_blank', 'noopener'); };
-  $('bSysnCenter').onclick = setupSysn;
+                if (got === 0 && e.name === 'TypeError') await bigProbe();
+          }
+          finally { btn.disabled = false; }
+        }
+        $('bBig').onclick = function () { log('info', 'opening ' + BIG_NAME + ' in a new tab'); window.open(BIG_URL, '_blank', 'noopener'); };
+        $('bSysnCenter').onclick = setupSysn;
   $('bClear').onclick = () => { lines.length = 0; logEl.textContent = ''; };
 $('bCopy').onclick = async () => {
   const text = lines.join('\n');
