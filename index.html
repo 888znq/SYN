@@ -162,8 +162,9 @@ button.ic::after{font-size:13px;font-weight:600;white-space:nowrap}
   <button class="main ic" id="bSysn"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg></button>
     <button class="ic" id="bOpen" title="Open folder" aria-label="Open folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 8z"/><path d="M7 10h15l-3 8H3z"/></svg></button>
           <button class="ic" id="bZip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
-          <button class="ic" id="bRepo" title="Download EXTOS repo folder" aria-label="Download EXTOS repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
-            <button class="ic" id="bBig" title="Download WWW.zip from archive.org (opens a new tab)" aria-label="Download WWW.zip from archive.org (opens a new tab)"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></svg></button>
+                    <button class="ic" id="bRepoFFT" title="Download FFT repo folder" aria-label="Download FFT repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
+                    <button class="ic" id="bRepoEXTOS" title="Download EXTOS repo folder" aria-label="Download EXTOS repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
+                      <button class="ic" id="bBig" title="Download WWW.zip from archive.org (opens a new tab)" aria-label="Download WWW.zip from archive.org (opens a new tab)"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></svg></button>
         <button class="ic danger" id="bRestore" title="Wipe folder and restore master" aria-label="Wipe folder and restore master"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
           <button class="ic" id="bMaster" title="Save current folder as master" aria-label="Save current folder as master"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
           <!-- copy log button moved into the log pane -->
@@ -194,7 +195,7 @@ const DB_PATH   = P.db;                     // the ONLY branch this page touches
 const POLL_MS   = 3000;
 const SYSN_NAME = P.name;                   // folder created automatically inside the location you pick
 const MAX_BYTES = 5 * 1024 * 1024;         // larger files are skipped (with a warning)
-const SKIP_DIRS = new Set(['.git', 'node_modules', 'EXTOS']);
+const SKIP_DIRS = new Set(['.git', 'node_modules', 'EXTOS', 'FFT']);
 const SKIP_FILE = /(^|\/)(\.DS_Store|Thumbs\.db|desktop\.ini)$|\.crswap$|~$/;
 
 // Hard-coded test file (used by "Push test file to cloud"). Acts like "another device".
@@ -863,11 +864,12 @@ async function downloadZip() {
 }
 $('bOpen').onclick = openFolder;
 $('bZip').onclick = downloadZip;
-async function saveRepo(given) {
-  var btn = $('bRepo'), parent = null, perm, res, buf, fh, w;
+async function saveRepo(given, repoName) {
+  repoName = repoName || 'EXTOS';
+  var btn = $('bRepo' + repoName), parent = null, perm, res, buf, fh, w;
     var tree, i, r2, data, name, crc, enc, zparts, zcentral, zoff, zcs, d, dt, tm, lh, ch, zend;
       var fl, rd, dd, fw, j, sp, nm;
-  if (btn.disabled) return;
+  if (btn && btn.disabled) return;
   if (!window.showDirectoryPicker) { log('err', 'showDirectoryPicker is not available: use desktop Chrome or Edge over https'); return; }
   btn.disabled = true;
   try {
@@ -883,32 +885,32 @@ async function saveRepo(given) {
           if (parent.name === SYSN_NAME) { log('warn', 'pick the folder that contains ' + SYSN_NAME + ', not ' + SYSN_NAME + ' itself'); return; }
           await idbSet(PARENT_KEY, parent);
         }
-        log('info', 'downloading EXTOS repo from GitHub…');
-            res = await fetch('https://api.github.com/repos/888znq/EXTOS/git/trees/HEAD?recursive=1');
-                if (!res.ok) throw new Error('GitHub answered ' + res.status);
-                tree = (await res.json()).tree.filter(function (n) { return n.type === 'blob'; });
-                if (!tree.length) throw new Error('repo is empty');
-                fl = [];
-                for (i = 0; i < tree.length; i++) {
-                  r2 = await fetch('https://raw.githubusercontent.com/888znq/EXTOS/HEAD/' + tree[i].path.split('/').map(encodeURIComponent).join('/'));
-                  if (!r2.ok) throw new Error('GitHub answered ' + r2.status + ' for ' + tree[i].path);
-                  data = new Uint8Array(await r2.arrayBuffer());
-                        fl.push({ p: tree[i].path, data: data });
-                        
-                }
-            
-            rd = await parent.getDirectoryHandle('EXTOS', { create: true });
-            for (i = 0; i < fl.length; i++) {
-              sp = fl[i].p.split('/'); nm = sp.pop(); dd = rd;
-              for (j = 0; j < sp.length; j++) dd = await dd.getDirectoryHandle(sp[j], { create: true });
-              fw = await (await dd.getFileHandle(nm, { create: true })).createWritable();
-              await fw.write(fl[i].data);
-              await fw.close();
-            }
-            log('ok', 'EXTOS folder extracted in "' + parent.name + '" (' + fl.length + ' files)');
-      } catch (e) { log('err', 'repo folder save failed: ' + e.message); }
-  finally { btn.disabled = false; }
-  }
+        log('info', 'downloading ' + repoName + ' repo from GitHub…');
+                    res = await fetch('https://api.github.com/repos/888znq/' + repoName + '/git/trees/HEAD?recursive=1');
+                        if (!res.ok) throw new Error('GitHub answered ' + res.status);
+                        tree = (await res.json()).tree.filter(function (n) { return n.type === 'blob'; });
+                        if (!tree.length) throw new Error('repo is empty');
+                        fl = [];
+                        for (i = 0; i < tree.length; i++) {
+                          r2 = await fetch('https://raw.githubusercontent.com/888znq/' + repoName + '/HEAD/' + tree[i].path.split('/').map(encodeURIComponent).join('/'));
+                          if (!r2.ok) throw new Error('GitHub answered ' + r2.status + ' for ' + tree[i].path);
+                          data = new Uint8Array(await r2.arrayBuffer());
+                                fl.push({ p: tree[i].path, data: data });
+                                
+                        }
+                    
+                    rd = await parent.getDirectoryHandle(repoName, { create: true });
+                    for (i = 0; i < fl.length; i++) {
+                      sp = fl[i].p.split('/'); nm = sp.pop(); dd = rd;
+                      for (j = 0; j < sp.length; j++) dd = await dd.getDirectoryHandle(sp[j], { create: true });
+                      fw = await (await dd.getFileHandle(nm, { create: true })).createWritable();
+                      await fw.write(fl[i].data);
+                      await fw.close();
+                    }
+                    log('ok', repoName + ' folder extracted in "' + parent.name + '" (' + fl.length + ' files)');
+              } catch (e) { log('err', 'repo folder save failed: ' + e.message); }
+          finally { if (btn) btn.disabled = false; }
+          }
   var BIG_URL = 'https://archive.org/download/wwwwwwww_202611/WWW.zip';
   var BIG_NAME = 'WWW.zip';
   async function bigProbe() {
@@ -967,8 +969,9 @@ async function saveRepo(given) {
     }
     finally { btn.disabled = false; }
   }
-  $('bRepo').onclick = function () { saveRepo(null); };
-  $('bBig').onclick = function () { log('info', 'opening ' + BIG_NAME + ' in a new tab'); window.open(BIG_URL, '_blank', 'noopener'); };
+  $('bRepoFFT').onclick = function () { saveRepo(null, 'FFT'); };
+    $('bRepoEXTOS').onclick = function () { saveRepo(null, 'EXTOS'); };
+    $('bBig').onclick = function () { log('info', 'opening ' + BIG_NAME + ' in a new tab'); window.open(BIG_URL, '_blank', 'noopener'); };
 $('bMaster').onclick = saveMaster;
 $('bRestore').onclick = restoreMaster;
 $('bPick').onclick = pickFolder;
