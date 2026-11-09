@@ -138,73 +138,39 @@ button.ic::after{font-size:13px;font-weight:600;white-space:nowrap}
 </head>
 <body>
 <header>
-  <h1>Folder Sync</h1>
+  <h1>Folder Downloader</h1>
   <div class="proj"><button id="bPE">EXTOS</button></div>
-  <span class="pill" id="pill" data-s="idle"><i></i><span id="pillTxt">No folder</span></span>
 </header>
-
-<div id="done"></div>
-
-<div class="row">
-  
-    <button id="bPick">Choose existing folder</button>
-  <button id="bResume" style="display:none">Reconnect folder</button>
-  <button id="bNow">Sync now</button>
-  <button id="bPause">Pause</button>
-  <span class="sp"></span>
-  <button id="bTest">Push test file to cloud</button>
-  <button id="bList">List cloud files</button>
-  <button class="danger" id="bReset">Reset cloud</button>
-</div>
-<div id="info">No folder connected.</div>
 
 <div class="row">
   <button class="main ic" id="bSysn"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg></button>
-    <button class="ic" id="bOpen" title="Open folder" aria-label="Open folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 8z"/><path d="M7 10h15l-3 8H3z"/></svg></button>
-          <button class="ic" id="bZip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
-                    <button class="ic" id="bRepoFFT" title="Download FFT repo folder" aria-label="Download FFT repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
-                    <button class="ic" id="bRepoEXTOS" title="Download EXTOS repo folder" aria-label="Download EXTOS repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
-                      <button class="ic" id="bBig" title="Download WWW.zip from archive.org (opens a new tab)" aria-label="Download WWW.zip from archive.org (opens a new tab)"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></svg></button>
-        <button class="ic danger" id="bRestore" title="Wipe folder and restore master" aria-label="Wipe folder and restore master"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
-          <button class="ic" id="bMaster" title="Save current folder as master" aria-label="Save current folder as master"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
-          <!-- copy log button moved into the log pane -->
+  <button class="ic" id="bOpen" title="Open folder" aria-label="Open folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 8z"/><path d="M7 10h15l-3 8H3z"/></svg></button>
+  <button class="ic" id="bZip"><svg viewBox="0 0 24 24"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></button>
+  <button class="ic" id="bRepoFFT" title="Download FFT repo folder" aria-label="Download FFT repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
+  <button class="ic" id="bRepoEXTOS" title="Download EXTOS repo folder" aria-label="Download EXTOS repo folder"><svg viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4 4 0 0 1-1 8"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></button>
+  <button class="ic" id="bBig" title="Download WWW.zip from archive.org (opens a new tab)" aria-label="Download WWW.zip from archive.org (opens a new tab)"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></svg></button>
   <button class="ic" id="bClear" title="Clear log" aria-label="Clear log"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
 </div>
-<div id="keep"><span id="keepTxt"></span><button id="bKeepSite" title="Copy this site's address">Copy site</button><button id="bKeepLink" title="Copy the browser settings link">Copy settings link</button><button id="bKeepX" title="Dismiss" aria-label="Dismiss">✕</button></div>
 <div id="panes">
   <div id="logbox"><div id="log" aria-live="off"></div><button class="ic" id="bCopy" title="Copy log" aria-label="Copy log"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button></div>
-  <div id="tree"><div class="te">No folder connected</div></div>
 </div>
 
 <script>
 'use strict';
 // ───────── Projects ─────────
-// EXTOS keeps its cloud path and storage keys.
 const PROJECTS = {
-  extos:  { name: 'EXTOS',  db: 'extSync/main',   sfx: '',        picker: 'extsync',        pickerParent: 'extsyncparent' }
+  extos:  { name: 'EXTOS', sfx: '', picker: 'extsync', pickerParent: 'extsyncparent' }
 };
 const PK = 'extos';
 const P = PROJECTS[PK];
 document.documentElement.dataset.p = PK;
-document.title = P.name + ' Sync';
+document.title = P.name + ' Downloader';
 
 // ───────── Settings ─────────
-const VERSION   = '2.3';
-const DB_URL    = 'https://system-data-bf026-default-rtdb.asia-southeast1.firebasedatabase.app';
-const DB_PATH   = P.db;                     // the ONLY branch this page touches for this project
-const POLL_MS   = 3000;
-const SYSN_NAME = P.name;                   // folder created automatically inside the location you pick
-const MAX_BYTES = 5 * 1024 * 1024;         // larger files are skipped (with a warning)
+const VERSION   = '3.0';
+const SYSN_NAME = P.name;
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'EXTOS', 'FFT']);
 const SKIP_FILE = /(^|\/)(\.DS_Store|Thumbs\.db|desktop\.ini)$|\.crswap$|~$/;
-
-// Hard-coded test file (used by "Push test file to cloud"). Acts like "another device".
-const TEST_FILE = {
-  path: 'sync-test/hello.txt',
-  text: 'Hello from the cloud.\nIf this file appears in your local folder, DOWNLOAD works.\nEdit it and save: it should upload within a few seconds.\nPushed at: '
-};
-
-if (/^(textNotes|splitView)(\/|$)/i.test(DB_PATH)) throw new Error('DB_PATH must not point at other apps');
 
 // ───────── Helpers ─────────
 const $ = id => document.getElementById(id);
@@ -236,33 +202,6 @@ function log(level, msg) {
   logEl.scrollTop = logEl.scrollHeight;
 }
 
-function setStatus(s, txt) {
-  $('pill').dataset.s = s;
-  $('pillTxt').textContent = txt;
-}
-
-// Firebase decodes %2E / %2F inside the URL path, so keys may only contain safe characters.
-// Everything except letters, digits, _ and - becomes ~XX (hex of each UTF-8 byte). The real path lives in meta.path.
-const keyOf = p => Array.from(new TextEncoder().encode(p)).map(function (c) {
-  const ch = String.fromCharCode(c);
-  return /[A-Za-z0-9_-]/.test(ch) ? ch : '~' + c.toString(16).padStart(2, '0');
-}).join('');
-function b64enc(buf) {
-  const b = new Uint8Array(buf); let s = '';
-  for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
-  return btoa(s);
-}
-function b64dec(s) {
-  const bin = atob(s), b = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i);
-  return b;
-}
-async function sha(buf) {
-  const h = await crypto.subtle.digest('SHA-256', buf);
-  return Array.from(new Uint8Array(h)).map(x => x.toString(16).padStart(2, '0')).join('');
-}
-const short = h => h ? h.slice(0, 8) : '-';
-
 // ───────── Tiny IndexedDB (remembers the chosen folder, one key per project) ─────────
 const HANDLE_KEY = 'handle' + P.sfx;
 const PARENT_KEY = 'parent' + P.sfx;
@@ -283,44 +222,8 @@ async function idbSet(k, v) {
   return new Promise((res, rej) => { const t = d.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); });
 }
 
-// ───────── Firebase REST ─────────
-async function db(method, sub, body, quiet) {
-  var tries = (method === 'GET' || method === 'PUT' || method === 'DELETE') ? 5 : 1;
-  var lastErr = null;
-  for (var i = 1; i <= tries; i++) {
-    try { return await dbOnce(method, sub, body, quiet); }
-    catch (e) {
-      lastErr = e;
-      if (!/network error/i.test(e.message) || i === tries) break;
-      log('warn', method + ' ' + (sub || '/') + ' attempt ' + i + ' failed (' + e.message + '), retrying');
-      await new Promise(function (res) { setTimeout(res, 1000 * i); });
-    }
-  }
-  throw lastErr;
-}
-async function dbOnce(method, sub, body, quiet) {
-  const url = DB_URL + '/' + DB_PATH + (sub ? '/' + sub : '') + '.json';
-  const t0 = performance.now();
-  var r, data = null;
-  try {
-    r = await fetch(url, { method, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store', signal: AbortSignal.timeout(/^(blobs|history|master)\//.test(sub || '') ? 45000 : 15000) });
-        if (method === 'GET' && r.ok) data = await r.json();
-  } catch (e) {
-    throw new Error(method + ' ' + sub + ' network error: ' + e.name + ' after ' + Math.round(performance.now() - t0) + ' ms');
-  }
-  const ms = Math.round(performance.now() - t0);
-  if (!quiet) log('net', method + ' ' + (sub || '/') + ' → ' + r.status + ' (' + ms + ' ms)');
-  else if (ms > 3000) log('warn', 'slow request: ' + method + ' ' + (sub || '/') + ' took ' + ms + ' ms');
-  if (!r.ok) throw new Error(method + ' ' + sub + ' → HTTP ' + r.status + (r.status === 401 || r.status === 403 ? ' (denied: check Firebase rules)' : ''));
-  return method === 'GET' ? data : null;
-}
-
 // ───────── Local folder access ─────────
 let root = null;
-const BASE_KEY = 'extsync.base' + P.sfx;
-let base = JSON.parse(localStorage.getItem(BASE_KEY) || '{}');   // path → hash at last sync
-const hcache = new Map();                                              // path → {m,s,h}
-const saveBase = () => localStorage.setItem(BASE_KEY, JSON.stringify(base));
 
 async function scan(dir, prefix, out) {
   for await (const [name, h] of dir.entries()) {
@@ -328,297 +231,10 @@ async function scan(dir, prefix, out) {
     else if (!SKIP_FILE.test(prefix + name)) out.set(prefix + name, h);
   }
 }
-const warned = new Set();
-async function localState() {
-  const handles = new Map();
-  await scan(root, '', handles);
-  const out = new Map();
-  for (const [p, h] of handles) {
-    const f = await h.getFile();
-    if (f.size > MAX_BYTES) { if (!warned.has(p)) { warned.add(p); log('warn', 'skipping ' + p + ' (' + f.size + ' bytes > limit)'); } continue; }
-    const c = hcache.get(p);
-    let hash;
-    if (c && c.m === f.lastModified && c.s === f.size) hash = c.h;
-    else { hash = await sha(await f.arrayBuffer()); hcache.set(p, { m: f.lastModified, s: f.size, h: hash }); }
-    out.set(p, { hash, mtime: f.lastModified, size: f.size });
-  }
-  return out;
-}
-async function dirFor(path, create) {
-  const parts = path.split('/'), name = parts.pop();
-  if (!name || parts.concat(name).some(s => !s || s === '.' || s === '..')) throw new Error('unsafe path: ' + path);
-  let d = root;
-  for (const s of parts) d = await d.getDirectoryHandle(s, { create });
-  return { d, name };
-}
-async function readLocal(p) {
-  const { d, name } = await dirFor(p, false);
-  const f = await (await d.getFileHandle(name)).getFile();
-  const buf = await f.arrayBuffer();
-  return { buf, hash: await sha(buf), mtime: f.lastModified };
-}
-async function writeLocal(p, bytes) {
-  const { d, name } = await dirFor(p, true);
-  const w = await (await d.getFileHandle(name, { create: true })).createWritable();
-  await w.write(bytes);
-  await w.close();
-}
-async function deleteLocal(p) {
-  const { d, name } = await dirFor(p, false);
-  await d.removeEntry(name);
-}
-
-// ───────── Cloud operations (history keeps old versions) ─────────
-let remote = {};
-async function archiveCloud(p, reason) {
-  const key = keyOf(p);
-  const [m, b] = await Promise.all([db('GET', 'meta/' + key, undefined, true), db('GET', 'blobs/' + key, undefined, true)]);
-  if (!m || m.deleted || b == null) return;
-  await db('PUT', 'history/' + Date.now() + '_' + key, { path: p, hash: m.hash, mtime: m.mtime, content: b, reason, by: DEVICE });
-  log('info', 'snapshot saved: ' + p + ' (' + reason + ')');
-}
-async function archiveLocal(p, reason) {
-  const l = await readLocal(p);
-  await db('PUT', 'history/' + Date.now() + '_' + keyOf(p), { path: p, hash: l.hash, mtime: l.mtime, content: b64enc(l.buf), reason, by: DEVICE });
-  log('info', 'snapshot saved (local copy): ' + p + ' (' + reason + ')');
-}
-async function upload(p) {
-  const l = await readLocal(p), key = keyOf(p);
-  if (remote[p] && !remote[p].deleted) await archiveCloud(p, 'before overwrite');
-  await db('PUT', 'blobs/' + key, b64enc(l.buf));
-  await db('PUT', 'meta/' + key, { path: p, hash: l.hash, size: l.buf.byteLength, mtime: l.mtime, deleted: false, by: DEVICE });
-  base[p] = l.hash;
-  log('up', 'UPLOADED ' + p + ' (' + l.buf.byteLength + ' B, ' + short(l.hash) + ')');
-}
-async function download(p) {
-  const b = await db('GET', 'blobs/' + keyOf(p));
-  if (b == null) throw new Error('cloud has meta but no content for ' + p);
-  const bytes = b64dec(b), hash = await sha(bytes);
-  if (remote[p] && remote[p].hash !== hash) log('warn', 'cloud changed during download of ' + p + '; using what arrived');
-  await writeLocal(p, bytes);
-  base[p] = hash;
-  hcache.delete(p);
-  log('down', 'DOWNLOADED ' + p + ' (' + bytes.length + ' B, ' + short(hash) + ')');
-}
-async function purgeHistory(p) {
-  const key = keyOf(p);
-  try {
-    const r = await fetch(DB_URL + '/' + DB_PATH + '/history.json?shallow=true', { cache: 'no-store', signal: AbortSignal.timeout(20000) });
-    if (!r.ok) throw new Error('history list → HTTP ' + r.status);
-    const ks = Object.keys((await r.json()) || {}).filter(function (k) { return k.slice(k.indexOf('_') + 1) === key; });
-    for (const k of ks) await db('DELETE', 'history/' + k, undefined, true);
-    if (ks.length) log('info', 'purged ' + ks.length + ' old snapshot(s) of ' + p);
-  } catch (e) { log('warn', 'could not purge snapshots of ' + p + ': ' + e.message); }
-}
-async function deleteCloud(p) {
-  const key = keyOf(p);
-  await purgeHistory(p);
-  await db('PUT', 'meta/' + key, { path: p, deleted: true, hash: null, mtime: Date.now(), by: DEVICE });
-  await db('DELETE', 'blobs/' + key);
-  delete base[p];
-  log('up', 'DELETED in cloud ' + p);
-}
-
-// ───────── Sync cycle ─────────
-let busy = false, paused = false, cycles = 0, announced = false;
-var busySince = 0, lastSkipLog = 0;
-async function cycle(why) {
-  if (!root) return;
-  if (busy) {
-    const s = Date.now() - busySince;
-    if (s > 15000 && Date.now() - lastSkipLog > 30000) { lastSkipLog = Date.now(); log('warn', 'cycle "' + why + '" skipped: previous cycle still running (' + Math.round(s / 1000) + ' s)'); }
-    return;
-  }
-  busy = true; busySince = Date.now();
-  let errs = 0;
-  try {
-    if (!paused) setStatus('syncing', 'Syncing…');
-    const loc = await localState();
-    const rm = (await db('GET', 'meta', undefined, true)) || {};
-    remote = {};
-    for (const k in rm) if (rm[k] && rm[k].path) remote[rm[k].path] = rm[k];
-    const live = Object.values(remote).filter(m => !m.deleted).length;
-
-    const acts = [];
-    const paths = new Set([...loc.keys(), ...Object.keys(remote), ...Object.keys(base)]);
-    for (const p of paths) {
-      const L = loc.get(p), Rm = remote[p], R = Rm && !Rm.deleted ? Rm : null, B = base[p];
-      const lh = L ? L.hash : null, rh = R ? R.hash : null;
-      if (lh === rh) { if (lh) base[p] = lh; else delete base[p]; continue; }
-      if (L && !R) {
-        if (B && lh === B && Rm && Rm.deleted) acts.push(['dl', p, 'deleted on another device']);
-        else if (B && lh !== B) acts.push(['up', p, 'edited locally']);
-        else acts.push(['up', p, B ? 'missing in cloud, re-uploading' : 'new local file']);
-      } else if (!L && R) {
-        if (B && rh === B) acts.push(['dr', p, 'deleted locally']);
-        else acts.push(['down', p, B ? 'changed in cloud (local copy was deleted)' : 'new cloud file']);
-      } else {
-        if (lh === B) acts.push(['down', p, 'changed in cloud']);
-        else if (rh === B) acts.push(['up', p, 'edited locally']);
-        else if (L.mtime >= R.mtime) acts.push(['up', p, 'conflict: local is newer (' + short(lh) + ' vs ' + short(rh) + ')']);
-        else acts.push(['cdown', p, 'conflict: cloud is newer (' + short(lh) + ' vs ' + short(rh) + ')']);
-      }
-    }
-
-    if (acts.length) {
-      log('info', 'cycle ' + (++cycles) + ' (' + why + '): local ' + loc.size + ' files, cloud ' + live + ' files, ' + acts.length + ' change(s)');
-      for (const [t, p, reason] of acts) {
-        log('info', '• ' + t + ' ' + p + ': ' + reason);
-        try {
-          if (t === 'up') await upload(p);
-          else if (t === 'down') await download(p);
-          else if (t === 'cdown') { await archiveLocal(p, 'lost conflict'); await download(p); }
-          else if (t === 'dl') { await deleteLocal(p); delete base[p]; log('down', 'DELETED locally ' + p); }
-          else if (t === 'dr') await deleteCloud(p);
-        } catch (e) { errs++; log('err', t + ' ' + p + ' failed: ' + e.message); }
-      }
-    } else if (++cycles % 10 === 0 || why === 'manual') {
-      log('info', 'cycle ' + cycles + ' (' + why + '): all in sync, local ' + loc.size + ', cloud ' + live);
-    }
-    saveBase();
-    drawTree(loc, acts.length > 0);
-        $('info').textContent = 'Folder: ' + root.name + ' · local ' + loc.size + ' files · cloud ' + live + ' files · last check ' + new Date().toLocaleTimeString();
-    if (errs) setStatus('error', 'Error (see log)');
-    else {
-      setStatus(paused ? 'paused' : 'synced', paused ? 'Paused' : 'Synced');
-      if (!announced) { announced = true; $('done').style.display = 'block'; log('ok', 'DONE: folder is up to date with the cloud'); }
-    }
-  } catch (e) {
-    if (e.name === 'NotFoundError') {
-          if (timer) { clearInterval(timer); timer = null; }
-          root = null;
-          setStatus('paused', 'Folder missing: click ' + P.name + ' icon');
-          log('err', 'connected folder no longer exists (deleted or moved). Auto-sync stopped, cloud untouched. Click the ' + P.name + ' icon to reconnect.');
-          return;
-        }
-        setStatus('error', e.message.indexOf('network') >= 0 ? 'Offline' : 'Error (see log)');
-    log('err', 'cycle failed: ' + e.message);
-  } finally { busy = false; }
-}
-
-// ───────── Polling loop ─────────
-var treeClosed = {}, treeBusy = false, treeSig = '';
-var TREE_TIP = { ok: 'synced', loc: 'local only, uploading', cld: 'cloud only, downloading', diff: 'differs, resolving' };
-function fmtSize(n) {
-  if (n == null) return '';
-  if (n < 1024) return n + ' B';
-  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
-  return (n / 1048576).toFixed(1) + ' MB';
-}
-function treeNode(n, prefix, parent) {
-  Object.keys(n.d).sort().forEach(function (name) {
-    var path = prefix + name + '/';
-    var det = document.createElement('details');
-    var sm = document.createElement('summary');
-    det.open = !treeClosed[path];
-    det.ontoggle = function () { treeClosed[path] = !det.open; };
-    sm.textContent = name;
-    det.appendChild(sm);
-    treeNode(n.d[name], path, det);
-    parent.appendChild(det);
-  });
-  n.f.forEach(function (f) {
-    var row = document.createElement('div');
-    var dot = document.createElement('i');
-    var nm = document.createElement('span');
-    var sz = document.createElement('em');
-    row.className = 'tf ' + f.st;
-    row.title = f.name + ' · ' + TREE_TIP[f.st];
-    nm.textContent = f.name;
-    sz.textContent = fmtSize(f.size);
-    var del = document.createElement('button');
-        del.className = 'del';
-        del.textContent = '✕';
-        del.title = 'Delete ' + f.name;
-        del.onclick = function (ev) { ev.stopPropagation(); deleteFile(prefix + f.name); };
-        nm.onclick = function () { openFile(prefix + f.name); };
-        row.appendChild(dot);
-        row.appendChild(nm);
-        row.appendChild(sz);
-        row.appendChild(del);
-        parent.appendChild(row);
-  });
-}
-async function drawTree(loc, changed) {
-  if (treeBusy) return;
-  treeBusy = true;
-  try {
-    var files = {}, rem = remote, lc = loc, k, rm;
-    if (changed) {
-      rm = (await db('GET', 'meta', undefined, true)) || {};
-      rem = {};
-      for (k in rm) if (rm[k] && rm[k].path) rem[rm[k].path] = rm[k];
-      lc = await localState();
-    }
-    lc.forEach(function (v, key) { files[key] = { l: v, r: null }; });
-    Object.keys(rem).forEach(function (key) {
-      if (rem[key].deleted) return;
-      if (!files[key]) files[key] = { l: null, r: null };
-      files[key].r = rem[key];
-    });
-    var paths = Object.keys(files).sort(), sig = [], tree = { d: {}, f: [] }, cnt = { ok: 0, pend: 0 };
-    paths.forEach(function (path) {
-      var f = files[path];
-      var st = f.l && f.r ? (f.l.hash === f.r.hash ? 'ok' : 'diff') : (f.l ? 'loc' : 'cld');
-      var parts = path.split('/'), name = parts.pop(), n = tree;
-      var size = (f.l || f.r).size;
-      parts.forEach(function (s) { n = n.d[s] || (n.d[s] = { d: {}, f: [] }); });
-      n.f.push({ name: name, st: st, size: size });
-      sig.push(path + '|' + st + '|' + size);
-      if (st === 'ok') cnt.ok++; else cnt.pend++;
-    });
-    var sg = (root ? root.name : '') + '#' + sig.join('\n');
-    if (sg === treeSig) return;
-    treeSig = sg;
-    var el = $('tree'), keep = el.scrollTop;
-    var head = document.createElement('div');
-    el.textContent = '';
-    head.className = 'th';
-    head.textContent = (root ? root.name : 'Folder') + ' · ' + paths.length + ' files · ' + cnt.ok + ' synced' + (cnt.pend ? ' · ' + cnt.pend + ' pending' : '');
-    el.appendChild(head);
-    if (!paths.length) {
-      var emp = document.createElement('div');
-      emp.className = 'te';
-      emp.textContent = 'No files yet';
-      el.appendChild(emp);
-    } else treeNode(tree, '', el);
-    el.scrollTop = keep;
-  } catch (e) { log('warn', 'file tree refresh failed: ' + e.message); }
-  finally { treeBusy = false; }
-}
-let timer = null, lastTick = 0;
-var tickWorker = null;
-function startLoop() {
-  if (timer) clearInterval(timer);
-  if (tickWorker) { tickWorker.terminate(); tickWorker = null; }
-  lastTick = Date.now();
-  var tick = function () {
-    var now = Date.now(), gap = now - lastTick;
-    if (gap < POLL_MS - 500) return;
-    lastTick = now;
-    if (gap > POLL_MS * 3) log('warn', 'poll was delayed ' + Math.round(gap / 1000) + ' s (browser throttles hidden tabs; keep this page visible or in its own window)');
-    if (!paused) cycle('auto');
-  };
-  timer = setInterval(tick, POLL_MS);
-  try {
-    tickWorker = new Worker(URL.createObjectURL(new Blob(['setInterval(function(){postMessage(1)},' + POLL_MS + ')'], { type: 'text/javascript' })));
-    tickWorker.onmessage = tick;
-  } catch (e) { tickWorker = null; }
-}
-
 // ───────── Folder connect ─────────
 async function useFolder(h, fresh) {
   root = h;
-  announced = false;
-  $('done').textContent = PK === 'extos'
-    ? 'Done. The folder is up to date. Load unpacked in Chrome from this folder; keep this page open while you edit.'
-    : 'Done. The folder is up to date. Keep this page open while you edit.';
-  $('done').style.display = 'none';
-  $('bResume').style.display = 'none';
-  if (fresh) { base = {}; hcache.clear(); saveBase(); }
-  log('ok', 'folder connected: "' + h.name + '"' + (fresh ? ' (new connection, sync history reset)' : ' (restored)'));
-  startLoop();
-  await cycle('connect');
+  log('ok', 'folder connected: "' + h.name + '"' + (fresh ? ' (new connection)' : ' (restored)'));
 }
 async function pickFolder() {
   if (!window.showDirectoryPicker) { log('err', 'showDirectoryPicker is not available: use desktop Chrome or Edge over https'); return; }
@@ -642,11 +258,11 @@ async function setupSysn() {
     }
   } catch (e) { log('err', 'could not create ' + SYSN_NAME + ': ' + e.message); return; }
   log('ok', 'permission granted · folder ' + SYSN_NAME + (existed ? ' ready (already existed)' : ' CREATED') + ' inside "' + parent.name + '"');
-    if (parent.name !== SYSN_NAME) await idbSet(PARENT_KEY, parent);
-    await idbSet(HANDLE_KEY, h);
-  await useFolder(h, true);
-  log('ok', P.name + ' connected: cloud files downloaded, auto-sync running (add/edit/delete syncs both ways)');
-      if (parent.name !== SYSN_NAME) {
+      if (parent.name !== SYSN_NAME) await idbSet(PARENT_KEY, parent);
+      await idbSet(HANDLE_KEY, h);
+    await useFolder(h, true);
+    log('ok', P.name + ' folder ready for downloads.');
+        if (parent.name !== SYSN_NAME) {
         await saveRepo(parent, 'EXTOS');
         await saveRepo(parent, 'FFT');
       }
@@ -659,150 +275,11 @@ async function resumeFolder() {
   if (p === 'granted') await useFolder(h, false);
 }
 
-// ───────── Test / diagnostic buttons ─────────
-async function pushTest() {
-  try {
-    const bytes = new TextEncoder().encode(TEST_FILE.text + new Date().toISOString() + '\n');
-    const hash = await sha(bytes), key = keyOf(TEST_FILE.path);
-    await archiveCloud(TEST_FILE.path, 'before test push').catch(() => {});
-    await db('PUT', 'blobs/' + key, b64enc(bytes));
-    await db('PUT', 'meta/' + key, { path: TEST_FILE.path, hash, size: bytes.length, mtime: Date.now(), deleted: false, by: 'test-seed' });
-    log('ok', 'test file pushed to cloud: ' + TEST_FILE.path + ' (' + short(hash) + ')');
-    if (root) cycle('manual');
-  } catch (e) { log('err', 'push test failed: ' + e.message); }
-}
-async function listCloud() {
-  try {
-    const m = (await db('GET', 'meta')) || {};
-    const ks = Object.keys(m);
-    log('info', 'cloud has ' + ks.length + ' entries:');
-    ks.forEach(k => log('info', '  ' + (m[k].deleted ? '[deleted] ' : '') + m[k].path + '  ' + (m[k].size != null ? m[k].size + ' B  ' : '') + short(m[k].hash) + '  by ' + m[k].by));
-  } catch (e) { log('err', 'list failed: ' + e.message); }
-}
-async function resetCloud() {
-  if (!confirm('Delete everything stored under ' + DB_PATH + ' in the cloud (files and history)?')) return;
-  try { await db('DELETE', ''); base = {}; saveBase(); log('warn', 'cloud branch ' + DB_PATH + ' cleared'); }
-  catch (e) { log('err', 'reset failed: ' + e.message); }
-}
-
 // ───────── Wiring ─────────
-var MIME = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', pdf: 'application/pdf' };
-async function openFile(p) {
-  try {
-    var l = await readLocal(p);
-    var ext = p.split('.').pop().toLowerCase();
-    var url = URL.createObjectURL(new Blob([l.buf], { type: MIME[ext] || 'text/plain;charset=utf-8' }));
-    window.open(url, '_blank');
-    setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
-  } catch (e) { log('warn', 'cannot open ' + p + ': ' + e.message + ' (it may still be downloading)'); }
-}
-async function deleteFile(p) {
-  if (!root) return;
-  if (!confirm('Delete "' + p + '" from the folder and the cloud?')) return;
-  try {
-    try { await deleteLocal(p); } catch (e) { if (e.name !== 'NotFoundError') throw e; }
-    await deleteCloud(p);
-    hcache.delete(p);
-    delete base[p];
-    saveBase();
-    log('ok', 'deleted ' + p);
-    cycle('manual');
-  } catch (e) { log('err', 'delete ' + p + ' failed: ' + e.message); }
-}
 async function openFolder() {
   if (!root) { log('warn', 'connect the ' + P.name + ' folder first'); return; }
   try { await window.showDirectoryPicker({ mode: 'read', startIn: root }); }
   catch (e) { /* dialog closed */ }
-}
-async function lockSync() {
-  while (busy) await new Promise(function (r) { setTimeout(r, 200); });
-  busy = true; busySince = Date.now();
-}
-async function pruneEmpty(dir) {
-  var empty = true, subs = [], i, sub, e;
-  for await (e of dir.entries()) {
-    if (e[1].kind === 'directory' && !SKIP_DIRS.has(e[0])) subs.push(e[0]);
-    else empty = false;
-  }
-  for (i = 0; i < subs.length; i++) {
-    sub = await dir.getDirectoryHandle(subs[i]);
-    if (await pruneEmpty(sub)) await dir.removeEntry(subs[i]);
-    else empty = false;
-  }
-  return empty;
-}
-async function saveMaster() {
-  if (!root) { log('warn', 'connect the ' + P.name + ' folder first'); return; }
-  if (!confirm('Save the current ' + P.name + ' folder as the new master version?\nThis replaces the previously saved ' + P.name + ' master.')) return;
-  await lockSync();
-  try {
-    setStatus('syncing', 'Saving master…');
-    var loc = await localState();
-    var paths = Array.from(loc.keys());
-    if (!paths.length) { log('warn', 'folder is empty: master not changed'); return; }
-    var oldMeta = (await db('GET', 'master/meta', undefined, true)) || {};
-    var meta = {}, i, p, l, key;
-    for (i = 0; i < paths.length; i++) {
-      p = paths[i]; l = await readLocal(p); key = keyOf(p);
-      await db('PUT', 'master/blobs/' + key, b64enc(l.buf), true);
-      meta[key] = { path: p, hash: l.hash, size: l.buf.byteLength };
-      if ((i + 1) % 10 === 0) log('info', 'master: ' + (i + 1) + '/' + paths.length + ' files saved');
-    }
-    await db('PUT', 'master/meta', meta, true);
-    await db('PUT', 'master/info', { savedAt: Date.now(), count: paths.length, by: DEVICE }, true);
-    for (key in oldMeta) { if (!meta[key]) await db('DELETE', 'master/blobs/' + key, undefined, true); }
-    log('ok', 'MASTER saved: ' + paths.length + ' files');
-  } catch (e) { log('err', 'save master failed: ' + e.message); }
-  finally { busy = false; }
-}
-async function restoreMaster() {
-  if (!root) { log('warn', 'connect the ' + P.name + ' folder first'); return; }
-  var info = null;
-  try { info = await db('GET', 'master/info', undefined, true); }
-  catch (e) { log('err', 'cannot reach cloud: ' + e.message); return; }
-  if (!info) { log('warn', 'no master saved yet: use the save-master button first'); return; }
-  if (!confirm('WIPE the current ' + P.name + ' folder and restore the master saved ' + new Date(info.savedAt).toLocaleString() + ' (' + info.count + ' files)?\n\nFiles that are not in the master will be deleted here and in the cloud.')) return;
-  var wiping = false;
-  await lockSync();
-  try {
-    setStatus('syncing', 'Restoring master…');
-    var meta = (await db('GET', 'master/meta', undefined, true)) || {};
-    var keys = Object.keys(meta), files = [], i, m, b, bytes, h, f;
-    if (!keys.length) throw new Error('master is empty');
-    for (i = 0; i < keys.length; i++) {
-      m = meta[keys[i]];
-      b = await db('GET', 'master/blobs/' + keys[i], undefined, true);
-      if (b == null) throw new Error('master content missing for ' + m.path);
-      bytes = b64dec(b); h = await sha(bytes);
-      if (h !== m.hash) throw new Error('master file damaged: ' + m.path);
-      files.push({ p: m.path, bytes: bytes });
-    }
-    log('info', 'master verified: ' + files.length + ' files, wiping folder');
-    wiping = true;
-    paused = true;
-    var handles = new Map();
-    await scan(root, '', handles);
-    var it = Array.from(handles.entries());
-    for (i = 0; i < it.length; i++) {
-      f = await it[i][1].getFile();
-      if (f.size > MAX_BYTES) { log('warn', 'kept ' + it[i][0] + ' (too large to sync)'); continue; }
-      await deleteLocal(it[i][0]);
-      hcache.delete(it[i][0]);
-    }
-    await pruneEmpty(root);
-    for (i = 0; i < files.length; i++) { await writeLocal(files[i].p, files[i].bytes); hcache.delete(files[i].p); }
-    log('ok', 'MASTER restored: ' + files.length + ' files written');
-  } catch (e) {
-    log('err', 'restore master failed: ' + e.message);
-    if (wiping) {
-      setStatus('paused', 'Restore failed');
-      log('err', 'restore stopped midway: auto-sync paused so the cloud stays untouched. Click restore again to retry.');
-      return;
-    }
-  }
-  finally { busy = false; }
-  paused = false;
-  cycle('restore');
 }
 var CRC_T = (function () {
   var t = [], c, n, k;
@@ -975,44 +452,8 @@ async function saveRepo(given, repoName) {
   $('bRepoFFT').onclick = function () { saveRepo(null, 'FFT'); };
     $('bRepoEXTOS').onclick = function () { saveRepo(null, 'EXTOS'); };
     $('bBig').onclick = function () { log('info', 'opening ' + BIG_NAME + ' in a new tab'); window.open(BIG_URL, '_blank', 'noopener'); };
-$('bMaster').onclick = saveMaster;
-$('bRestore').onclick = restoreMaster;
 $('bPick').onclick = pickFolder;
 $('bSysn').onclick = setupSysn;
-var IS_EDGE = /Edg\//.test(navigator.userAgent);
-var KEEP_URL = IS_EDGE ? 'edge://settings/system/optimizePerformance' : 'chrome://settings/performance';
-function copyText(t, okMsg) {
-  var done = function () { log('ok', okMsg); };
-  if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, function () { log('warn', 'copy failed'); });
-  else {
-    var ta = document.createElement('textarea');
-    ta.value = t; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); ta.remove(); done();
-  }
-}
-function keepPrompt() {
-  try { if (localStorage.getItem('extsync.keepdone')) return; } catch (e) {}
-  $('keepTxt').textContent = 'Keep sync running in the background: open ' + KEEP_URL + ' → ' + (IS_EDGE ? '"Never put these sites to sleep"' : '"Always keep these sites active"') + ' → Add → paste this site.';
-  $('keep').style.display = 'flex';
-}
-$('bKeepSite').onclick = function () { copyText(location.hostname || location.href, 'site address copied: paste it in the browser settings list'); };
-$('bKeepLink').onclick = function () { copyText(KEEP_URL, 'settings link copied: paste it in a new tab address bar'); };
-$('bKeepX').onclick = function () {
-  $('keep').style.display = 'none';
-  try { localStorage.setItem('extsync.keepdone', '1'); } catch (e) {}
-};
-$('bResume').onclick = resumeFolder;
-$('bNow').onclick = () => root ? cycle('manual') : log('warn', 'choose a folder first');
-$('bPause').onclick = () => {
-  paused = !paused;
-  $('bPause').textContent = paused ? 'Resume' : 'Pause';
-  setStatus(paused ? 'paused' : 'syncing', paused ? 'Paused' : 'Syncing…');
-  log('info', paused ? 'auto-sync paused' : 'auto-sync resumed');
-  if (!paused) cycle('resume');
-};
-$('bTest').onclick = pushTest;
-$('bList').onclick = listCloud;
-$('bReset').onclick = resetCloud;
 $('bClear').onclick = () => { lines.length = 0; logEl.textContent = ''; };
 $('bCopy').onclick = async () => {
   const text = lines.join('\n');
@@ -1024,33 +465,21 @@ $('bCopy').onclick = async () => {
     log('ok', 'log copied (fallback, ' + lines.length + ' lines)');
   }
 };
-document.addEventListener('visibilitychange', () => {
-  log('net', 'tab ' + document.visibilityState);
-  if (document.visibilityState === 'visible' && !paused) cycle('tab visible');
-});
 window.addEventListener('error', e => log('err', 'uncaught: ' + e.message));
 window.addEventListener('unhandledrejection', e => log('err', 'unhandled: ' + (e.reason && e.reason.message || e.reason)));
 
 // ───────── Startup ─────────
 (async function init() {
-  log('info', 'Folder Sync v' + VERSION + ' · project ' + P.name + ' · device ' + DEVICE);
-    try { if (navigator.locks) navigator.locks.request('extsync-keepalive' + P.sfx, function () { return new Promise(function () {}); }); } catch (e) {}
-    keepPrompt();
+  log('info', 'Downloader v' + VERSION + ' · project ' + P.name + ' · device ' + DEVICE);
   log('info', 'browser: ' + navigator.userAgent);
-  log('info', 'secure context: ' + window.isSecureContext + ' · folder API: ' + !!window.showDirectoryPicker + ' · crypto: ' + !!(window.crypto && crypto.subtle));
-  log('info', 'cloud: ' + DB_URL + '/' + DB_PATH);
-  try {
-    const m = (await db('GET', 'meta')) || {};
-    log('ok', 'cloud reachable, ' + Object.keys(m).length + ' entries');
-    setStatus('idle', 'No folder');
-  } catch (e) { log('err', 'cloud check failed: ' + e.message); setStatus('error', 'Cloud unreachable'); }
+  log('info', 'secure context: ' + window.isSecureContext + ' · folder API: ' + !!window.showDirectoryPicker);
   try {
     const h = await idbGet(HANDLE_KEY);
     if (h) {
       const p = await h.queryPermission({ mode: 'readwrite' });
       log('info', 'saved folder "' + h.name + '", permission: ' + p);
       if (p === 'granted') await useFolder(h, false);
-      else { $('bResume').style.display = ''; $('bResume').textContent = 'Reconnect "' + h.name + '"'; setStatus('paused', 'Click ' + P.name + ' icon to reconnect'); }
+      else { log('warn', 'Click Choose folder to reconnect'); }
     }
   } catch (e) { log('warn', 'could not restore saved folder: ' + e.message); }
 })();
